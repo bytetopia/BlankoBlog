@@ -1,0 +1,230 @@
+import React, { useState, useEffect } from 'react'
+import {
+  Box,
+  Typography,
+  Button,
+  Paper,
+  TextField,
+  FormControlLabel,
+  Switch,
+  CircularProgress,
+  Alert,
+  AppBar,
+  Toolbar,
+  IconButton,
+} from '@mui/material'
+import { ArrowBack, Save } from '@mui/icons-material'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { postsAPI } from '../services/api'
+import type { CreatePostRequest, UpdatePostRequest } from '../services/api'
+
+const PostEditorPage: React.FC = () => {
+  const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  
+  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string>('')
+  const [success, setSuccess] = useState<string>('')
+  const [post, setPost] = useState({
+    title: '',
+    content: '',
+    summary: '',
+    published: false,
+  })
+
+  const isEditing = Boolean(id && id !== 'new')
+  const pageTitle = isEditing ? 'Edit Post' : 'Create New Post'
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login')
+    }
+  }, [isAuthenticated, navigate])
+
+  // Load post data if editing
+  useEffect(() => {
+    const loadPost = async () => {
+      if (isEditing && id) {
+        try {
+          setLoading(true)
+          const response = await postsAPI.getPost(parseInt(id))
+          const postData = response.data
+          setPost({
+            title: postData.title,
+            content: postData.content,
+            summary: postData.summary,
+            published: postData.published,
+          })
+        } catch (err) {
+          console.error('Error loading post:', err)
+          setError('Failed to load post')
+        } finally {
+          setLoading(false)
+        }
+      }
+    }
+
+    if (isAuthenticated) {
+      loadPost()
+    }
+  }, [isAuthenticated, isEditing, id])
+
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      setError('')
+      setSuccess('')
+
+      if (isEditing && id) {
+        const updateData: UpdatePostRequest = {
+          title: post.title,
+          content: post.content,
+          summary: post.summary,
+          published: post.published,
+        }
+        await postsAPI.updatePost(parseInt(id), updateData)
+        setSuccess('Post updated successfully!')
+      } else {
+        const createData: CreatePostRequest = {
+          title: post.title,
+          content: post.content,
+          summary: post.summary,
+          published: post.published,
+        }
+        const response = await postsAPI.createPost(createData)
+        setSuccess('Post created successfully!')
+        
+        // Navigate to edit mode for the newly created post
+        if (response.data?.id) {
+          navigate(`/admin/posts/${response.data.id}`, { replace: true })
+        }
+      }
+    } catch (err) {
+      console.error('Error saving post:', err)
+      setError('Failed to save post')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleBack = () => {
+    navigate('/admin')
+  }
+
+  const handleFieldChange = (field: string, value: string | boolean) => {
+    setPost(prev => ({ ...prev, [field]: value }))
+  }
+
+  if (!isAuthenticated) {
+    return null
+  }
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  return (
+    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <AppBar position="static" color="default" elevation={1}>
+        <Toolbar>
+          <IconButton
+            edge="start"
+            onClick={handleBack}
+            sx={{ mr: 2 }}
+          >
+            <ArrowBack />
+          </IconButton>
+          
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            {pageTitle}
+          </Typography>
+          
+          <Button
+            variant="contained"
+            startIcon={<Save />}
+            onClick={handleSave}
+            disabled={saving || !post.title.trim() || !post.content.trim()}
+          >
+            {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
+          </Button>
+        </Toolbar>
+      </AppBar>
+
+      {/* Content */}
+      <Box sx={{ flex: 1, p: 3, overflow: 'auto' }}>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            {success}
+          </Alert>
+        )}
+
+        <Paper sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              label="Post Title"
+              value={post.title}
+              onChange={(e) => handleFieldChange('title', e.target.value)}
+              placeholder="Enter your post title..."
+              variant="outlined"
+              sx={{ mb: 3 }}
+            />
+            
+            <TextField
+              fullWidth
+              label="Summary (Optional)"
+              value={post.summary}
+              onChange={(e) => handleFieldChange('summary', e.target.value)}
+              placeholder="Enter a brief summary of your post..."
+              multiline
+              rows={3}
+              variant="outlined"
+              sx={{ mb: 3 }}
+              helperText="This summary will be displayed in post previews and search results"
+            />
+            
+            <TextField
+              fullWidth
+              label="Content"
+              value={post.content}
+              onChange={(e) => handleFieldChange('content', e.target.value)}
+              placeholder="Write your post content here..."
+              multiline
+              minRows={20}
+              variant="outlined"
+              sx={{ mb: 3, '& .MuiInputBase-root': { fontFamily: 'monospace' } }}
+            />
+            
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={post.published}
+                  onChange={(e) => handleFieldChange('published', e.target.checked)}
+                />
+              }
+              label="Publish immediately"
+              sx={{ mt: 1 }}
+            />
+          </Box>
+        </Paper>
+      </Box>
+    </Box>
+  )
+}
+
+export default PostEditorPage

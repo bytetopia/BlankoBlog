@@ -5,6 +5,7 @@ import HomePage from './pages/HomePage'
 import PostPage from './pages/PostPage'
 import LoginPage from './pages/LoginPage'
 import AdminPage from './pages/AdminPage'
+import PostEditorPage from './pages/PostEditorPage'
 
 function App() {
   return (
@@ -16,6 +17,8 @@ function App() {
           <Route path="/posts/:slug" element={<PostPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/posts/new" element={<PostEditorPage />} />
+          <Route path="/admin/posts/:id" element={<PostEditorPage />} />
         </Routes>
       </Container>
     </>

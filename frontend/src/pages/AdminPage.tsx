@@ -12,13 +12,6 @@ import {
   TableRow,
   IconButton,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControlLabel,
-  Switch,
   CircularProgress,
   Alert,
 } from '@mui/material'
@@ -32,15 +25,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { postsAPI } from '../services/api'
-import type { BlogPost, CreatePostRequest, UpdatePostRequest } from '../services/api'
-
-interface PostDialogData {
-  id?: number
-  title: string
-  content: string
-  summary: string
-  published: boolean
-}
+import type { BlogPost } from '../services/api'
 
 const AdminPage: React.FC = () => {
   const { isAuthenticated } = useAuth()
@@ -49,14 +34,6 @@ const AdminPage: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>('')
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingPost, setEditingPost] = useState<PostDialogData>({
-    title: '',
-    content: '',
-    summary: '',
-    published: false,
-  })
-  const [isEditing, setIsEditing] = useState(false)
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -85,65 +62,12 @@ const AdminPage: React.FC = () => {
     }
   }, [isAuthenticated])
 
-  const handleOpenDialog = (post?: BlogPost) => {
-    if (post) {
-      setEditingPost({
-        id: post.id,
-        title: post.title,
-        content: post.content,
-        summary: post.summary,
-        published: post.published,
-      })
-      setIsEditing(true)
-    } else {
-      setEditingPost({
-        title: '',
-        content: '',
-        summary: '',
-        published: false,
-      })
-      setIsEditing(false)
-    }
-    setDialogOpen(true)
+  const handleCreatePost = () => {
+    navigate('/admin/posts/new')
   }
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false)
-    setEditingPost({
-      title: '',
-      content: '',
-      summary: '',
-      published: false,
-    })
-    setIsEditing(false)
-  }
-
-  const handleSavePost = async () => {
-    try {
-      if (isEditing && editingPost.id) {
-        const updateData: UpdatePostRequest = {
-          title: editingPost.title,
-          content: editingPost.content,
-          summary: editingPost.summary,
-          published: editingPost.published,
-        }
-        await postsAPI.updatePost(editingPost.id, updateData)
-      } else {
-        const createData: CreatePostRequest = {
-          title: editingPost.title,
-          content: editingPost.content,
-          summary: editingPost.summary,
-          published: editingPost.published,
-        }
-        await postsAPI.createPost(createData)
-      }
-      
-      handleCloseDialog()
-      fetchPosts() // Refresh the list
-    } catch (err) {
-      console.error('Error saving post:', err)
-      setError('Failed to save post')
-    }
+  const handleEditPost = (post: BlogPost) => {
+    navigate(`/admin/posts/${post.id}`)
   }
 
   const handleDeletePost = async (id: number) => {
@@ -187,7 +111,7 @@ const AdminPage: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => handleOpenDialog()}
+          onClick={handleCreatePost}
         >
           New Post
         </Button>
@@ -243,7 +167,7 @@ const AdminPage: React.FC = () => {
                   <TableCell align="right">
                     <IconButton
                       size="small"
-                      onClick={() => handleOpenDialog(post)}
+                      onClick={() => handleEditPost(post)}
                       color="primary"
                     >
                       <Edit />
@@ -262,65 +186,6 @@ const AdminPage: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      {/* Post Dialog */}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {isEditing ? 'Edit Post' : 'Create New Post'}
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 1 }}>
-            <TextField
-              fullWidth
-              label="Title"
-              value={editingPost.title}
-              onChange={(e) => setEditingPost({ ...editingPost, title: e.target.value })}
-              margin="normal"
-            />
-            
-            <TextField
-              fullWidth
-              label="Summary (optional)"
-              value={editingPost.summary}
-              onChange={(e) => setEditingPost({ ...editingPost, summary: e.target.value })}
-              margin="normal"
-              multiline
-              rows={2}
-            />
-            
-            <TextField
-              fullWidth
-              label="Content"
-              value={editingPost.content}
-              onChange={(e) => setEditingPost({ ...editingPost, content: e.target.value })}
-              margin="normal"
-              multiline
-              rows={10}
-            />
-            
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={editingPost.published}
-                  onChange={(e) => setEditingPost({ ...editingPost, published: e.target.checked })}
-                />
-              }
-              label="Publish immediately"
-              sx={{ mt: 2 }}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button
-            onClick={handleSavePost}
-            variant="contained"
-            disabled={!editingPost.title || !editingPost.content}
-          >
-            {isEditing ? 'Update' : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   )
 }
