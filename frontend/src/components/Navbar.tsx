@@ -35,7 +35,7 @@ const Navbar: React.FC = () => {
   }
 
   const handleSettings = () => {
-    navigate('/settings')
+    navigate('/admin/settings')
     handleClose()
   }
 

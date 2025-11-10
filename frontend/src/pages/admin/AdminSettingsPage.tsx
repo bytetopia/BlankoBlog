@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import {
-  Container,
   Paper,
   Typography,
   Tabs,
@@ -13,8 +12,9 @@ import {
 } from '@mui/material'
 import { Save, Lock, Settings as SettingsIcon } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { settingsAPI, type UpdateConfigRequest, type UpdatePasswordRequest } from '../services/api'
+import { useAuth } from '../../contexts/AuthContext'
+import { settingsAPI, type UpdateConfigRequest, type UpdatePasswordRequest } from '../../services/api'
+import AdminNavbar from '../../components/AdminNavbar'
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -49,7 +49,7 @@ function a11yProps(index: number) {
   }
 }
 
-const SettingsPage: React.FC = () => {
+const AdminSettingsPage: React.FC = () => {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const [tabValue, setTabValue] = useState(0)
@@ -173,127 +173,130 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <SettingsIcon />
-          Settings
-        </Typography>
-
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
-            <Tab label="Blog Settings" {...a11yProps(0)} />
-            <Tab label="User Settings" {...a11yProps(1)} />
-          </Tabs>
-        </Box>
-
-        <TabPanel value={tabValue} index={0}>
-          <Typography variant="h6" gutterBottom>
-            Blog Configuration
-          </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
-            Customize your blog's appearance and content.
+    <Box>
+      <AdminNavbar />
+      <Box sx={{ px: 4, py: 4 }}>
+        <Paper sx={{ p: 3 }}>
+          <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <SettingsIcon />
+            Settings
           </Typography>
 
-          {configLoading ? (
-            <Typography>Loading...</Typography>
-          ) : (
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
+              <Tab label="Blog Settings" {...a11yProps(0)} />
+              <Tab label="User Settings" {...a11yProps(1)} />
+            </Tabs>
+          </Box>
+
+          <TabPanel value={tabValue} index={0}>
+            <Typography variant="h6" gutterBottom>
+              Blog Configuration
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
+              Customize your blog's appearance and content.
+            </Typography>
+
+            {configLoading ? (
+              <Typography>Loading...</Typography>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <TextField
+                  fullWidth
+                  label="Blog Name"
+                  value={config.blog_name || ''}
+                  onChange={(e) => handleConfigChange('blog_name', e.target.value)}
+                  helperText="The name of your blog displayed in the header"
+                />
+                <TextField
+                  fullWidth
+                  label="Blog Description"
+                  value={config.blog_description || ''}
+                  onChange={(e) => handleConfigChange('blog_description', e.target.value)}
+                  helperText="A brief description of your blog"
+                />
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  label="Blog Introduction"
+                  value={config.blog_introduction || ''}
+                  onChange={(e) => handleConfigChange('blog_introduction', e.target.value)}
+                  helperText="An introduction text displayed on the homepage"
+                />
+                <Button
+                  variant="contained"
+                  startIcon={<Save />}
+                  onClick={handleConfigSave}
+                  disabled={configSaving}
+                  sx={{ alignSelf: 'flex-start', mt: 2 }}
+                >
+                  {configSaving ? 'Saving...' : 'Save Blog Settings'}
+                </Button>
+              </Box>
+            )}
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={1}>
+            <Typography variant="h6" gutterBottom>
+              Password Settings
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
+              Change your account password.
+            </Typography>
+
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
               <TextField
                 fullWidth
-                label="Blog Name"
-                value={config.blog_name || ''}
-                onChange={(e) => handleConfigChange('blog_name', e.target.value)}
-                helperText="The name of your blog displayed in the header"
+                type="password"
+                label="Current Password"
+                value={passwordData.current_password}
+                onChange={(e) => handlePasswordChange('current_password', e.target.value)}
+                required
               />
               <TextField
                 fullWidth
-                label="Blog Description"
-                value={config.blog_description || ''}
-                onChange={(e) => handleConfigChange('blog_description', e.target.value)}
-                helperText="A brief description of your blog"
+                type="password"
+                label="New Password"
+                value={passwordData.new_password}
+                onChange={(e) => handlePasswordChange('new_password', e.target.value)}
+                helperText="Password must be at least 6 characters long"
+                required
               />
               <TextField
                 fullWidth
-                multiline
-                rows={4}
-                label="Blog Introduction"
-                value={config.blog_introduction || ''}
-                onChange={(e) => handleConfigChange('blog_introduction', e.target.value)}
-                helperText="An introduction text displayed on the homepage"
+                type="password"
+                label="Confirm New Password"
+                value={passwordData.confirm_password}
+                onChange={(e) => handlePasswordChange('confirm_password', e.target.value)}
+                required
               />
               <Button
                 variant="contained"
-                startIcon={<Save />}
-                onClick={handleConfigSave}
-                disabled={configSaving}
+                startIcon={<Lock />}
+                onClick={handlePasswordSave}
+                disabled={passwordSaving || !passwordData.current_password || !passwordData.new_password || !passwordData.confirm_password}
                 sx={{ alignSelf: 'flex-start', mt: 2 }}
               >
-                {configSaving ? 'Saving...' : 'Save Blog Settings'}
+                {passwordSaving ? 'Updating...' : 'Update Password'}
               </Button>
             </Box>
-          )}
-        </TabPanel>
+          </TabPanel>
+        </Paper>
 
-        <TabPanel value={tabValue} index={1}>
-          <Typography variant="h6" gutterBottom>
-            Password Settings
-          </Typography>
-          <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
-            Change your account password.
-          </Typography>
-
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <TextField
-              fullWidth
-              type="password"
-              label="Current Password"
-              value={passwordData.current_password}
-              onChange={(e) => handlePasswordChange('current_password', e.target.value)}
-              required
-            />
-            <TextField
-              fullWidth
-              type="password"
-              label="New Password"
-              value={passwordData.new_password}
-              onChange={(e) => handlePasswordChange('new_password', e.target.value)}
-              helperText="Password must be at least 6 characters long"
-              required
-            />
-            <TextField
-              fullWidth
-              type="password"
-              label="Confirm New Password"
-              value={passwordData.confirm_password}
-              onChange={(e) => handlePasswordChange('confirm_password', e.target.value)}
-              required
-            />
-            <Button
-              variant="contained"
-              startIcon={<Lock />}
-              onClick={handlePasswordSave}
-              disabled={passwordSaving || !passwordData.current_password || !passwordData.new_password || !passwordData.confirm_password}
-              sx={{ alignSelf: 'flex-start', mt: 2 }}
-            >
-              {passwordSaving ? 'Updating...' : 'Update Password'}
-            </Button>
-          </Box>
-        </TabPanel>
-      </Paper>
-
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Container>
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      </Box>
+    </Box>
   )
 }
 
-export default SettingsPage
+export default AdminSettingsPage

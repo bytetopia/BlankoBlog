@@ -14,18 +14,20 @@ import {
   IconButton,
 } from '@mui/material'
 import { ArrowBack, Save } from '@mui/icons-material'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
-import { postsAPI } from '../services/api'
-import type { CreatePostRequest, UpdatePostRequest, Tag } from '../services/api'
-import TagInput from '../components/TagInput'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
+import { postsAPI } from '../../services/api'
+import type { CreatePostRequest, UpdatePostRequest, Tag } from '../../services/api'
+import TagInput from '../../components/TagInput'
 import MDEditor from '@uiw/react-md-editor'
 import '@uiw/react-md-editor/markdown-editor.css'
+import AdminNavbar from '../../components/AdminNavbar'
 
 const PostEditorPage: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const location = useLocation()
   
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -134,7 +136,13 @@ const PostEditorPage: React.FC = () => {
   }
 
   const handleBack = () => {
-    navigate('/admin')
+    // Check if we're on an admin route
+    const isAdminRoute = location.pathname.startsWith('/admin')
+    if (isAdminRoute) {
+      navigate('/admin/posts')
+    } else {
+      navigate('/admin') // fallback
+    }
   }
 
   const handleFieldChange = (field: string, value: string | boolean | Tag[]) => {
@@ -164,43 +172,77 @@ const PostEditorPage: React.FC = () => {
   }
 
   if (loading) {
+    const isAdminRoute = location.pathname.startsWith('/admin')
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
+      <Box>
+        {isAdminRoute && <AdminNavbar />}
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+          <CircularProgress />
+        </Box>
       </Box>
     )
   }
 
+  const isAdminRoute = location.pathname.startsWith('/admin')
+
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      <AppBar position="static" color="default" elevation={1}>
-        <Toolbar>
-          <IconButton
-            edge="start"
-            onClick={handleBack}
-            sx={{ mr: 2 }}
-          >
-            <ArrowBack />
-          </IconButton>
-          
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            {pageTitle}
-          </Typography>
-          
-          <Button
-            variant="contained"
-            startIcon={<Save />}
-            onClick={handleSave}
-            disabled={saving || !post.title.trim() || !post.content.trim()}
-          >
-            {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
-          </Button>
-        </Toolbar>
-      </AppBar>
+      {isAdminRoute ? (
+        <AdminNavbar />
+      ) : (
+        <AppBar position="static" color="default" elevation={1}>
+          <Toolbar>
+            <IconButton
+              edge="start"
+              onClick={handleBack}
+              sx={{ mr: 2 }}
+            >
+              <ArrowBack />
+            </IconButton>
+            
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              {pageTitle}
+            </Typography>
+            
+            <Button
+              variant="contained"
+              startIcon={<Save />}
+              onClick={handleSave}
+              disabled={saving || !post.title.trim() || !post.content.trim()}
+            >
+              {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
+            </Button>
+          </Toolbar>
+        </AppBar>
+      )}
 
       {/* Content */}
-      <Box sx={{ flex: 1, p: 3, overflow: 'auto' }}>
+      <Box sx={{ flex: 1, px: 3, py: 3, overflow: 'auto' }}>
+        {/* Show page header and save button for admin routes */}
+        {isAdminRoute && (
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconButton
+                onClick={handleBack}
+              >
+                <ArrowBack />
+              </IconButton>
+              <Typography variant="h4" component="h1">
+                {pageTitle}
+              </Typography>
+            </Box>
+            <Button
+              variant="contained"
+              startIcon={<Save />}
+              onClick={handleSave}
+              disabled={saving || !post.title.trim() || !post.content.trim()}
+              size="large"
+            >
+              {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
+            </Button>
+          </Box>
+        )}
+
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
@@ -277,7 +319,7 @@ const PostEditorPage: React.FC = () => {
               </Typography>
               <TagInput
                 selectedTags={post.tags}
-                onTagsChange={(tags) => handleFieldChange('tags', tags)}
+                onTagsChange={(tags: Tag[]) => handleFieldChange('tags', tags)}
                 placeholder="Search or create tags..."
                 allowCreate={true}
               />
