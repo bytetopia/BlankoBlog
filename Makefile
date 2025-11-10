@@ -18,13 +18,26 @@ dev-backend: ## Start backend development server
 
 dev-frontend: ## Start frontend development server
 	@echo "Starting frontend server..."
-	cd frontend && npm start
+	cd frontend && npm run dev
 
 build: ## Build both backend and frontend for production
-	@echo "Building backend..."
-	cd backend && go build -o bin/server cmd/server/main.go
 	@echo "Building frontend..."
 	cd frontend && npm run build
+	@echo "Copying frontend artifacts to backend..."
+	rm -rf backend/static
+	cp -r frontend/dist backend/static
+	@echo "Building backend..."
+	cd backend && go build -o bin/server cmd/server/main.go
+
+build-prod: build ## Alias for build (for production)
+
+build-frontend: ## Build only frontend
+	@echo "Building frontend..."
+	cd frontend && npm run build
+
+build-backend: ## Build only backend
+	@echo "Building backend..."
+	cd backend && go build -o bin/server cmd/server/main.go
 
 test: ## Run tests
 	@echo "Running backend tests..."
@@ -35,6 +48,7 @@ test: ## Run tests
 clean: ## Clean build artifacts
 	@echo "Cleaning up..."
 	rm -rf backend/bin
+	rm -rf backend/static
 	rm -rf frontend/build
 	rm -rf frontend/dist
 

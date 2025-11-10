@@ -25,6 +25,7 @@ go.work.sum
 # Backend build artifacts
 backend/bin/
 backend/tmp/
+backend/static/
 
 # Frontend - Node.js
 node_modules/

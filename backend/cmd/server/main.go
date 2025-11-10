@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/bytetopia/BlankoBlog/backend/internal/database"
 	"github.com/bytetopia/BlankoBlog/backend/internal/handlers"
@@ -50,6 +51,26 @@ func main() {
 			protected.DELETE("/posts/:id", postHandler.DeletePost)
 		}
 	}
+
+	// Serve static files (frontend)
+	r.Static("/static", "./static")
+	r.Static("/assets", "./static/assets")
+	r.StaticFile("/", "./static/index.html")
+	
+	// Handle favicon requests gracefully
+	r.GET("/favicon.ico", func(c *gin.Context) {
+		c.File("./static/vite.svg")
+	})
+	
+	// Serve index.html for any non-API routes (SPA routing)
+	r.NoRoute(func(c *gin.Context) {
+		// Skip API routes
+		if !strings.HasPrefix(c.Request.URL.Path, "/api") && !strings.HasPrefix(c.Request.URL.Path, "/health") {
+			c.File("./static/index.html")
+		} else {
+			c.JSON(404, gin.H{"error": "Not found"})
+		}
+	})
 
 	// Health check
 	r.GET("/health", func(c *gin.Context) {
