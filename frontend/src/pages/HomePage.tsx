@@ -2,18 +2,16 @@ import React, { useState, useEffect } from 'react'
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
-  Button,
-  Chip,
+  List,
+  ListItem,
+  ListItemButton,
   Pagination,
   CircularProgress,
 } from '@mui/material'
-import { AccessTime, Visibility } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { postsAPI } from '../services/api'
 import type { BlogPost, PaginatedPostsResponse } from '../services/api'
-import TagList from '../components/TagList'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 
 const HomePage: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([])
@@ -25,11 +23,14 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>('')
   const navigate = useNavigate()
+  
+  // Use the custom hook for document title and get site name
+  const { blogName } = useDocumentTitle()
 
   const fetchPosts = async (page = 1) => {
     try {
       setLoading(true)
-      const response = await postsAPI.getPosts(page, 6, true)
+      const response = await postsAPI.getPosts(page, 10, true) // 10 posts per page
       const data: PaginatedPostsResponse = response.data
       setPosts(data.posts || [])
       setPagination(data.pagination || {
@@ -82,15 +83,24 @@ const HomePage: React.FC = () => {
   }
 
   return (
-    <Box>
-      {/* Hero Section */}
-      <Box textAlign="center" mb={6}>
-        <Typography variant="h6" color="text.secondary" paragraph>
-          Your space for ideas and insights
-        </Typography>
-      </Box>
+    <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, mt: 4 }}>
+      {/* Site Title */}
+      <Typography 
+        variant="h2" 
+        component="h1" 
+        sx={{ 
+          fontSize: { xs: '2.5rem', md: '3.5rem' },
+          fontWeight: 'bold',
+          textAlign: 'left',
+          mb: 4,
+          ml: 3, // Align with post list text (mx: 1 + px: 2 = 3)
+          color: 'primary.main'
+        }}
+      >
+        {blogName}
+      </Typography>
 
-      {/* Posts Grid */}
+      {/* Posts List */}
       {posts.length === 0 ? (
         <Box textAlign="center" mt={4}>
           <Typography variant="h6" color="text.secondary">
@@ -99,78 +109,56 @@ const HomePage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Box
-            display="grid"
-            gridTemplateColumns={{ xs: "1fr", md: "1fr 1fr" }}
-            gap={3}
-          >
+          <List sx={{ p: 0 }}>
             {posts.map((post) => (
-              <Box key={post.id}>
-                <Card
+              <ListItem 
+                key={post.id} 
+                sx={{ 
+                  px: 0,
+                }}
+              >
+                <ListItemButton
+                  onClick={() => navigate(`/posts/${post.slug}`)}
                   sx={{
-                    height: '100%',
                     display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'transform 0.2s ease-in-out',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    py: 1.5,
+                    px: 2,
+                    borderRadius: 2,
+                    mx: 1,
                     '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 4,
-                    },
+                      backgroundColor: 'action.hover',
+                    }
                   }}
                 >
-                  <CardContent sx={{ flexGrow: 1 }}>
-                    <Box display="flex" alignItems="center" mb={1}>
-                      <AccessTime fontSize="small" color="action" />
-                      <Typography variant="caption" color="text.secondary" ml={0.5}>
-                        {formatDate(post.created_at)}
-                      </Typography>
-                      <Chip
-                        label="Published"
-                        size="small"
-                        color="success"
-                        sx={{ ml: 'auto' }}
-                      />
-                    </Box>
-                    
-                    <Typography variant="h5" component="h2" gutterBottom>
-                      {post.title}
-                    </Typography>
-                    
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      paragraph
-                      sx={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: 'vertical',
-                      }}
-                    >
-                      {post.summary || post.content.substring(0, 200) + '...'}
-                    </Typography>
-
-                    {/* Tags */}
-                    {post.tags && post.tags.length > 0 && (
-                      <Box sx={{ mb: 2 }}>
-                        <TagList tags={post.tags} />
-                      </Box>
-                    )}
-                    
-                    <Button
-                      variant="contained"
-                      startIcon={<Visibility />}
-                      onClick={() => navigate(`/posts/${post.slug}`)}
-                      sx={{ mt: 'auto' }}
-                    >
-                      Read More
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Box>
+                  <Typography 
+                    variant="h6" 
+                    component="h2"
+                    sx={{ 
+                      fontWeight: 'medium',
+                      color: 'text.primary',
+                      textAlign: 'left',
+                      flex: 1
+                    }}
+                  >
+                    {post.title}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary"
+                    sx={{ 
+                      textAlign: 'right',
+                      minWidth: 'fit-content',
+                      ml: 2
+                    }}
+                  >
+                    {formatDate(post.created_at)}
+                  </Typography>
+                </ListItemButton>
+              </ListItem>
             ))}
-          </Box>
+          </List>
 
           {/* Pagination */}
           {pagination.total_pages > 1 && (

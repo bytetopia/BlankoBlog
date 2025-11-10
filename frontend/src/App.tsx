@@ -24,11 +24,12 @@ const AdminLoadingFallback = () => (
 function App() {
   const location = useLocation()
   const isAdminRoute = location.pathname.startsWith('/admin')
+  const isLoginRoute = location.pathname === '/login'
 
   return (
     <>
-      {/* Only show regular navbar on non-admin pages */}
-      {!isAdminRoute && <Navbar />}
+      {/* Only show navbar on login page */}
+      {isLoginRoute && <Navbar />}
       {isAdminRoute ? (
         // Admin routes without container padding for full-screen layout
         // Wrap with Suspense to handle lazy loading
