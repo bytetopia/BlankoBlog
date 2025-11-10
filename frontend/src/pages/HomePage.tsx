@@ -30,11 +30,16 @@ const HomePage: React.FC = () => {
       setLoading(true)
       const response = await postsAPI.getPosts(page, 6, true)
       const data: PaginatedPostsResponse = response.data
-      setPosts(data.posts)
-      setPagination(data.pagination)
+      setPosts(data.posts || [])
+      setPagination(data.pagination || {
+        page: 1,
+        total_pages: 1,
+        total: 0,
+      })
     } catch (err) {
       setError('Failed to load blog posts')
       console.error('Error fetching posts:', err)
+      setPosts([])
     } finally {
       setLoading(false)
     }

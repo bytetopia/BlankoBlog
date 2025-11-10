@@ -43,10 +43,15 @@ func Initialize() (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 
-	// Seed initial data in development
+	// Always seed admin user data for all environments
+	if err := seedAdminUser(db); err != nil {
+		log.Printf("Warning: failed to seed admin user: %v", err)
+	}
+
+	// Seed sample posts only in development
 	if os.Getenv("ENV") == "development" {
-		if err := seedData(db); err != nil {
-			log.Printf("Warning: failed to seed data: %v", err)
+		if err := seedSamplePosts(db); err != nil {
+			log.Printf("Warning: failed to seed sample posts: %v", err)
 		}
 	}
 
@@ -62,8 +67,8 @@ func runMigrations(db *gorm.DB) error {
 	)
 }
 
-// seedData populates the database with initial data for development
-func seedData(db *gorm.DB) error {
+// seedAdminUser creates the default admin user if no users exist
+func seedAdminUser(db *gorm.DB) error {
 	// Check if admin user already exists
 	var userCount int64
 	if err := db.Model(&models.User{}).Count(&userCount).Error; err != nil {
@@ -89,6 +94,11 @@ func seedData(db *gorm.DB) error {
 		log.Println("Created default admin user (username: admin, password: admin123)")
 	}
 
+	return nil
+}
+
+// seedSamplePosts creates sample blog posts for development
+func seedSamplePosts(db *gorm.DB) error {
 	// Check if any posts exist
 	var postCount int64
 	if err := db.Model(&models.Post{}).Count(&postCount).Error; err != nil {
@@ -107,7 +117,7 @@ func seedData(db *gorm.DB) error {
 			},
 			{
 				Title:     "Getting Started with Blogging",
-				Content:   "Writing a blog can be a rewarding experience. Here are some tips to get you started:\n\n1. Choose topics you're passionate about\n2. Write regularly\n3. Engage with your readers\n4. Keep your content authentic\n\nRemember, the most important thing is to start writing and improve over time.",
+				Content:   "Writing a blog can be rewarding experience. Here are some tips to get you started:\n\n1. Choose topics you're passionate about\n2. Write regularly\n3. Engage with your readers\n4. Keep your content authentic\n\nRemember, the most important thing is to start writing and improve over time.",
 				Summary:   "Tips and advice for starting your blogging journey.",
 				Slug:      "getting-started-with-blogging",
 				Published: true,

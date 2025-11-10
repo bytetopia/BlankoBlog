@@ -35,7 +35,7 @@ func (h *PostHandler) GetPosts(c *gin.Context) {
 	}
 
 	// Convert to response format
-	var postResponses []models.PostResponse
+	postResponses := make([]models.PostResponse, 0, len(posts))
 	for _, post := range posts {
 		postResponses = append(postResponses, post.ToResponse())
 	}

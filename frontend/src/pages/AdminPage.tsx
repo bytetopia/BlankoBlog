@@ -69,10 +69,11 @@ const AdminPage: React.FC = () => {
     try {
       setLoading(true)
       const response = await postsAPI.getPosts(1, 100, false) // Get all posts including drafts
-      setPosts(response.data.posts)
+      setPosts(response.data.posts || [])
     } catch (err) {
       setError('Failed to load posts')
       console.error('Error fetching posts:', err)
+      setPosts([])
     } finally {
       setLoading(false)
     }
