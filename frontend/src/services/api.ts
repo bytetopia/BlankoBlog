@@ -38,6 +38,15 @@ export interface BlogPost {
   summary: string
   slug: string
   published: boolean
+  tags: Tag[]
+  created_at: string
+  updated_at: string
+}
+
+export interface Tag {
+  id: number
+  name: string
+  color: string
   created_at: string
   updated_at: string
 }
@@ -78,6 +87,7 @@ export interface CreatePostRequest {
   summary?: string
   slug?: string
   published: boolean
+  tag_ids?: number[]
 }
 
 export interface UpdatePostRequest {
@@ -86,6 +96,17 @@ export interface UpdatePostRequest {
   summary?: string
   slug?: string
   published?: boolean
+  tag_ids?: number[]
+}
+
+export interface CreateTagRequest {
+  name: string
+  color?: string
+}
+
+export interface UpdateTagRequest {
+  name?: string
+  color?: string
 }
 
 export interface PaginatedPostsResponse {
@@ -134,4 +155,22 @@ export const settingsAPI = {
 
   updatePassword: (data: UpdatePasswordRequest) =>
     api.put('/settings/password', data),
+}
+
+// Tags API
+export const tagsAPI = {
+  getAllTags: () =>
+    api.get<{ tags: Tag[] }>('/tags'),
+
+  getTag: (id: number) =>
+    api.get<{ tag: Tag }>(`/tags/${id}`),
+
+  createTag: (data: CreateTagRequest) =>
+    api.post<{ tag: Tag }>('/tags', data),
+
+  updateTag: (id: number, data: UpdateTagRequest) =>
+    api.put<{ tag: Tag }>(`/tags/${id}`, data),
+
+  deleteTag: (id: number) =>
+    api.delete(`/tags/${id}`),
 }

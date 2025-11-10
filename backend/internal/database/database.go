@@ -53,6 +53,9 @@ func Initialize() (*gorm.DB, error) {
 		if err := seedSamplePosts(db); err != nil {
 			log.Printf("Warning: failed to seed sample posts: %v", err)
 		}
+		if err := seedSampleTags(db); err != nil {
+			log.Printf("Warning: failed to seed sample tags: %v", err)
+		}
 	}
 
 	log.Println("Database initialized successfully")
@@ -65,6 +68,7 @@ func runMigrations(db *gorm.DB) error {
 		&models.User{},
 		&models.Post{},
 		&models.Config{},
+		&models.Tag{},
 	)
 }
 
@@ -138,6 +142,49 @@ func seedSamplePosts(db *gorm.DB) error {
 			}
 		}
 		log.Println("Created sample blog posts")
+	}
+
+	return nil
+}
+
+// seedSampleTags creates sample tags for development
+func seedSampleTags(db *gorm.DB) error {
+	// Check if any tags exist
+	var tagCount int64
+	if err := db.Model(&models.Tag{}).Count(&tagCount).Error; err != nil {
+		return err
+	}
+
+	if tagCount == 0 {
+		// Create sample tags
+		sampleTags := []models.Tag{
+			{Name: "Technology", Color: "#3B82F6"},
+			{Name: "Tutorial", Color: "#10B981"},
+			{Name: "Personal", Color: "#8B5CF6"},
+			{Name: "News", Color: "#F59E0B"},
+			{Name: "Review", Color: "#EF4444"},
+		}
+
+		for _, tag := range sampleTags {
+			if err := db.Create(&tag).Error; err != nil {
+				return err
+			}
+		}
+
+		// Associate some tags with existing posts
+		var posts []models.Post
+		if err := db.Find(&posts).Error; err == nil && len(posts) > 0 {
+			// First post gets Technology and Tutorial tags
+			if len(posts) > 0 {
+				db.Model(&posts[0]).Association("Tags").Append(&sampleTags[0], &sampleTags[1])
+			}
+			// Second post gets Personal and Tutorial tags
+			if len(posts) > 1 {
+				db.Model(&posts[1]).Association("Tags").Append(&sampleTags[2], &sampleTags[1])
+			}
+		}
+
+		log.Println("Created sample tags and associated with posts")
 	}
 
 	return nil

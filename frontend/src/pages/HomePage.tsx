@@ -13,6 +13,7 @@ import { AccessTime, Visibility } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { postsAPI } from '../services/api'
 import type { BlogPost, PaginatedPostsResponse } from '../services/api'
+import TagList from '../components/TagList'
 
 const HomePage: React.FC = () => {
   const [posts, setPosts] = useState<BlogPost[]>([])
@@ -149,6 +150,13 @@ const HomePage: React.FC = () => {
                     >
                       {post.summary || post.content.substring(0, 200) + '...'}
                     </Typography>
+
+                    {/* Tags */}
+                    {post.tags && post.tags.length > 0 && (
+                      <Box sx={{ mb: 2 }}>
+                        <TagList tags={post.tags} />
+                      </Box>
+                    )}
                     
                     <Button
                       variant="contained"

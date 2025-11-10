@@ -11,6 +11,7 @@ import { ArrowBack, AccessTime, CalendarToday } from '@mui/icons-material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { postsAPI } from '../services/api'
 import type { BlogPost } from '../services/api'
+import TagList from '../components/TagList'
 import MDEditor from '@uiw/react-md-editor'
 import '@uiw/react-md-editor/markdown-editor.css'
 
@@ -130,6 +131,16 @@ const PostPage: React.FC = () => {
             >
               {post.summary}
             </Typography>
+          )}
+
+          {/* Tags */}
+          {post.tags && post.tags.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
+                Tags:
+              </Typography>
+              <TagList tags={post.tags} />
+            </Box>
           )}
         </Box>
 

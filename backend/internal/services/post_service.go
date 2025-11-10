@@ -10,11 +10,15 @@ import (
 )
 
 type PostService struct {
-	db *gorm.DB
+	db         *gorm.DB
+	tagService *TagService
 }
 
 func NewPostService(db *gorm.DB) *PostService {
-	return &PostService{db: db}
+	return &PostService{
+		db:         db,
+		tagService: NewTagService(db),
+	}
 }
 
 // GetPosts retrieves posts with pagination
@@ -32,9 +36,9 @@ func (s *PostService) GetPosts(page, limit int, publishedOnly bool) ([]models.Po
 		return nil, 0, err
 	}
 
-	// Get posts with pagination
+	// Get posts with pagination and preload tags
 	offset := (page - 1) * limit
-	if err := query.Order("created_at DESC").Offset(offset).Limit(limit).Find(&posts).Error; err != nil {
+	if err := query.Preload("Tags").Order("created_at DESC").Offset(offset).Limit(limit).Find(&posts).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -44,7 +48,7 @@ func (s *PostService) GetPosts(page, limit int, publishedOnly bool) ([]models.Po
 // GetPostByID retrieves a post by ID
 func (s *PostService) GetPostByID(id uint, publishedOnly bool) (*models.Post, error) {
 	var post models.Post
-	query := s.db
+	query := s.db.Preload("Tags")
 
 	if publishedOnly {
 		query = query.Where("published = ?", true)
@@ -60,7 +64,7 @@ func (s *PostService) GetPostByID(id uint, publishedOnly bool) (*models.Post, er
 // GetPostBySlug retrieves a post by slug
 func (s *PostService) GetPostBySlug(slug string, publishedOnly bool) (*models.Post, error) {
 	var post models.Post
-	query := s.db.Where("slug = ?", slug)
+	query := s.db.Preload("Tags").Where("slug = ?", slug)
 
 	if publishedOnly {
 		query = query.Where("published = ?", true)
@@ -98,8 +102,27 @@ func (s *PostService) CreatePost(req models.CreatePostRequest) (*models.Post, er
 		Published: req.Published,
 	}
 
+	// Create post first
 	if err := s.db.Create(&post).Error; err != nil {
 		return nil, err
+	}
+
+	// Handle tags if provided
+	if len(req.TagIDs) > 0 {
+		tags, err := s.tagService.GetTagsByIDs(req.TagIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get tags: %w", err)
+		}
+
+		// Associate tags with the post
+		if err := s.db.Model(&post).Association("Tags").Append(tags); err != nil {
+			return nil, fmt.Errorf("failed to associate tags: %w", err)
+		}
+
+		// Reload post with tags
+		if err := s.db.Preload("Tags").First(&post, post.ID).Error; err != nil {
+			return nil, err
+		}
 	}
 
 	return &post, nil
@@ -108,7 +131,7 @@ func (s *PostService) CreatePost(req models.CreatePostRequest) (*models.Post, er
 // UpdatePost updates an existing blog post
 func (s *PostService) UpdatePost(id uint, req models.UpdatePostRequest) (*models.Post, error) {
 	var post models.Post
-	if err := s.db.First(&post, id).Error; err != nil {
+	if err := s.db.Preload("Tags").First(&post, id).Error; err != nil {
 		return nil, err
 	}
 
@@ -143,7 +166,32 @@ func (s *PostService) UpdatePost(id uint, req models.UpdatePostRequest) (*models
 		post.Published = *req.Published
 	}
 
+	// Handle tag updates if provided
+	if req.TagIDs != nil {
+		// Clear existing tags
+		if err := s.db.Model(&post).Association("Tags").Clear(); err != nil {
+			return nil, fmt.Errorf("failed to clear existing tags: %w", err)
+		}
+
+		// Add new tags if any provided
+		if len(*req.TagIDs) > 0 {
+			tags, err := s.tagService.GetTagsByIDs(*req.TagIDs)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get tags: %w", err)
+			}
+
+			if err := s.db.Model(&post).Association("Tags").Append(tags); err != nil {
+				return nil, fmt.Errorf("failed to associate tags: %w", err)
+			}
+		}
+	}
+
 	if err := s.db.Save(&post).Error; err != nil {
+		return nil, err
+	}
+
+	// Reload post with updated tags
+	if err := s.db.Preload("Tags").First(&post, post.ID).Error; err != nil {
 		return nil, err
 	}
 

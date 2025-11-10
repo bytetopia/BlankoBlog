@@ -21,6 +21,7 @@ import {
   Delete,
   Visibility,
   VisibilityOff,
+  LocalOffer,
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
@@ -108,13 +109,22 @@ const AdminPage: React.FC = () => {
         <Typography variant="h5" component="h1">
           Admin Panel
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={handleCreatePost}
-        >
-          New Post
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button
+            variant="outlined"
+            startIcon={<LocalOffer />}
+            onClick={() => navigate('/admin/tags')}
+          >
+            Manage Tags
+          </Button>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={handleCreatePost}
+          >
+            New Post
+          </Button>
+        </Box>
       </Box>
 
       {error && (

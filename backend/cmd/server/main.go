@@ -32,6 +32,7 @@ func main() {
 	// Initialize services
 	userService := services.NewUserService(db)
 	configService := services.NewConfigService(db)
+	tagService := services.NewTagService(db)
 
 	// Initialize default configurations
 	if err := configService.InitializeDefaultConfigs(); err != nil {
@@ -42,6 +43,7 @@ func main() {
 	postHandler := handlers.NewPostHandler(db)
 	authHandler := handlers.NewAuthHandler(db)
 	settingsHandler := handlers.NewSettingsHandler(configService, userService, db)
+	tagHandler := handlers.NewTagHandler(tagService)
 
 	// API routes
 	api := r.Group("/api")
@@ -49,6 +51,7 @@ func main() {
 		// Public routes
 		api.GET("/posts", postHandler.GetPosts)
 		api.GET("/posts/:id", postHandler.GetPost)
+		api.GET("/tags", tagHandler.GetAllTags)
 
 		// Public config routes (for blog name, description, etc.)
 		api.GET("/config", settingsHandler.GetConfigs)
@@ -63,6 +66,12 @@ func main() {
 			protected.POST("/posts", postHandler.CreatePost)
 			protected.PUT("/posts/:id", postHandler.UpdatePost)
 			protected.DELETE("/posts/:id", postHandler.DeletePost)
+			
+			// Tag management routes (admin only)
+			protected.POST("/tags", tagHandler.CreateTag)
+			protected.GET("/tags/:id", tagHandler.GetTag)
+			protected.PUT("/tags/:id", tagHandler.UpdateTag)
+			protected.DELETE("/tags/:id", tagHandler.DeleteTag)
 			
 			// Settings routes
 			settings := protected.Group("/settings")

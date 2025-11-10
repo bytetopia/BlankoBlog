@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage'
 import AdminPage from './pages/AdminPage'
 import PostEditorPage from './pages/PostEditorPage'
 import SettingsPage from './pages/SettingsPage'
+import TagsPage from './pages/TagsPage'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/posts/new" element={<PostEditorPage />} />
           <Route path="/admin/posts/:id" element={<PostEditorPage />} />
+          <Route path="/admin/tags" element={<TagsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Container>
