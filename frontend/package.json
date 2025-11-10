@@ -16,6 +16,7 @@
     "@mui/lab": "^7.0.1-beta.19",
     "@mui/material": "^7.3.5",
     "@mui/system": "^7.3.5",
+    "@uiw/react-md-editor": "^4.0.8",
     "axios": "^1.13.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",

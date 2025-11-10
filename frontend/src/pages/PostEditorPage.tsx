@@ -18,6 +18,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { postsAPI } from '../services/api'
 import type { CreatePostRequest, UpdatePostRequest } from '../services/api'
+import MDEditor from '@uiw/react-md-editor'
+import '@uiw/react-md-editor/markdown-editor.css'
 
 const PostEditorPage: React.FC = () => {
   const { isAuthenticated } = useAuth()
@@ -264,17 +266,18 @@ const PostEditorPage: React.FC = () => {
               helperText="This summary will be displayed in post previews and search results"
             />
             
-            <TextField
-              fullWidth
-              label="Content"
-              value={post.content}
-              onChange={(e) => handleFieldChange('content', e.target.value)}
-              placeholder="Write your post content here..."
-              multiline
-              minRows={20}
-              variant="outlined"
-              sx={{ mb: 3, '& .MuiInputBase-root': { fontFamily: 'monospace' } }}
-            />
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
+                Content (Markdown)
+              </Typography>
+              <MDEditor
+                value={post.content}
+                onChange={(value) => handleFieldChange('content', value || '')}
+                preview="edit"
+                height={500}
+                data-color-mode="light"
+              />
+            </Box>
             
             <FormControlLabel
               control={

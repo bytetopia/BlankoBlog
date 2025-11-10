@@ -11,6 +11,8 @@ import { ArrowBack, AccessTime, CalendarToday } from '@mui/icons-material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { postsAPI } from '../services/api'
 import type { BlogPost } from '../services/api'
+import MDEditor from '@uiw/react-md-editor'
+import '@uiw/react-md-editor/markdown-editor.css'
 
 const PostPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>()
@@ -132,17 +134,68 @@ const PostPage: React.FC = () => {
         </Box>
 
         {/* Post Content */}
-        <Typography
-          variant="body1"
-          component="div"
+        <Box
           sx={{
-            lineHeight: 1.8,
-            '& p': { mb: 2 },
-            whiteSpace: 'pre-line',
+            '& .w-md-editor': {
+              backgroundColor: 'transparent',
+            },
+            '& .w-md-editor-preview': {
+              padding: 0,
+              backgroundColor: 'transparent',
+              boxShadow: 'none',
+            },
+            '& .wmde-markdown': {
+              backgroundColor: 'transparent',
+              fontSize: '1rem',
+              lineHeight: 1.8,
+              color: 'inherit',
+            },
+            '& .wmde-markdown h1, & .wmde-markdown h2, & .wmde-markdown h3, & .wmde-markdown h4, & .wmde-markdown h5, & .wmde-markdown h6': {
+              marginTop: '2rem',
+              marginBottom: '1rem',
+            },
+            '& .wmde-markdown h1': {
+              fontSize: '2rem',
+            },
+            '& .wmde-markdown h2': {
+              fontSize: '1.75rem',
+            },
+            '& .wmde-markdown h3': {
+              fontSize: '1.5rem',
+            },
+            '& .wmde-markdown p': {
+              marginBottom: '1rem',
+            },
+            '& .wmde-markdown ul, & .wmde-markdown ol': {
+              marginBottom: '1rem',
+              paddingLeft: '2rem',
+            },
+            '& .wmde-markdown blockquote': {
+              borderLeft: '4px solid #ddd',
+              paddingLeft: '1rem',
+              marginLeft: 0,
+              fontStyle: 'italic',
+              color: '#666',
+            },
+            '& .wmde-markdown pre': {
+              backgroundColor: '#f5f5f5',
+              padding: '1rem',
+              borderRadius: '4px',
+              overflow: 'auto',
+            },
+            '& .wmde-markdown code': {
+              backgroundColor: '#f5f5f5',
+              padding: '0.2rem 0.4rem',
+              borderRadius: '3px',
+              fontSize: '0.9em',
+            },
           }}
         >
-          {post.content}
-        </Typography>
+          <MDEditor.Markdown
+            source={post.content}
+            data-color-mode="light"
+          />
+        </Box>
       </Paper>
     </Box>
   )
