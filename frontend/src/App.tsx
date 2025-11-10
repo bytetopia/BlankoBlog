@@ -10,7 +10,7 @@ function App() {
   return (
     <>
       <Navbar />
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Container maxWidth="xl" sx={{ px: 2, py: 1 }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/posts/:slug" element={<PostPage />} />
