@@ -49,6 +49,19 @@ export interface User {
   is_admin: boolean
 }
 
+export interface Config {
+  configs: Record<string, string>
+}
+
+export interface UpdateConfigRequest {
+  configs: Record<string, string>
+}
+
+export interface UpdatePasswordRequest {
+  current_password: string
+  new_password: string
+}
+
 export interface LoginRequest {
   username: string
   password: string
@@ -109,4 +122,16 @@ export const postsAPI = {
   
   deletePost: (id: number) =>
     api.delete(`/posts/${id}`),
+}
+
+// Settings API
+export const settingsAPI = {
+  getConfig: () =>
+    api.get<Config>('/config'),
+
+  updateConfig: (data: UpdateConfigRequest) =>
+    api.put('/settings/config', data),
+
+  updatePassword: (data: UpdatePasswordRequest) =>
+    api.put('/settings/password', data),
 }

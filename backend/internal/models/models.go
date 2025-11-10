@@ -31,6 +31,16 @@ type User struct {
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
+// Config represents system configuration settings
+type Config struct {
+	ID          uint      `json:"id" gorm:"primarykey"`
+	Key         string    `json:"key" gorm:"uniqueIndex;not null"`
+	Value       string    `json:"value" gorm:"not null"`
+	Description string    `json:"description"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 // PostResponse represents the public response format for a post
 type PostResponse struct {
 	ID        uint      `json:"id"`
@@ -76,6 +86,22 @@ type LoginResponse struct {
 		Email    string `json:"email"`
 		IsAdmin  bool   `json:"is_admin"`
 	} `json:"user"`
+}
+
+// UpdateConfigRequest represents the request to update configuration
+type UpdateConfigRequest struct {
+	Configs map[string]string `json:"configs" validate:"required"`
+}
+
+// ConfigResponse represents the configuration response
+type ConfigResponse struct {
+	Configs map[string]string `json:"configs"`
+}
+
+// UpdatePasswordRequest represents the request to update user password
+type UpdatePasswordRequest struct {
+	CurrentPassword string `json:"current_password" validate:"required"`
+	NewPassword     string `json:"new_password" validate:"required,min=6"`
 }
 
 // ToResponse converts a Post to PostResponse

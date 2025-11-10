@@ -7,6 +7,7 @@ import (
 
 	"github.com/bytetopia/BlankoBlog/backend/internal/database"
 	"github.com/bytetopia/BlankoBlog/backend/internal/handlers"
+	"github.com/bytetopia/BlankoBlog/backend/internal/services"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -28,9 +29,19 @@ func main() {
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
 	r.Use(cors.New(config))
 
+	// Initialize services
+	userService := services.NewUserService(db)
+	configService := services.NewConfigService(db)
+
+	// Initialize default configurations
+	if err := configService.InitializeDefaultConfigs(); err != nil {
+		log.Printf("Warning: Failed to initialize default configs: %v", err)
+	}
+
 	// Initialize handlers
 	postHandler := handlers.NewPostHandler(db)
 	authHandler := handlers.NewAuthHandler(db)
+	settingsHandler := handlers.NewSettingsHandler(configService, userService, db)
 
 	// API routes
 	api := r.Group("/api")
@@ -38,6 +49,9 @@ func main() {
 		// Public routes
 		api.GET("/posts", postHandler.GetPosts)
 		api.GET("/posts/:id", postHandler.GetPost)
+
+		// Public config routes (for blog name, description, etc.)
+		api.GET("/config", settingsHandler.GetConfigs)
 
 		// Auth routes
 		api.POST("/auth/login", authHandler.Login)
@@ -49,6 +63,13 @@ func main() {
 			protected.POST("/posts", postHandler.CreatePost)
 			protected.PUT("/posts/:id", postHandler.UpdatePost)
 			protected.DELETE("/posts/:id", postHandler.DeletePost)
+			
+			// Settings routes
+			settings := protected.Group("/settings")
+			{
+				settings.PUT("/config", settingsHandler.UpdateConfigs)
+				settings.PUT("/password", settingsHandler.UpdatePassword)
+			}
 		}
 	}
 
