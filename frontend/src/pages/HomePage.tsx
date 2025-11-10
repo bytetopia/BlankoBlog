@@ -84,9 +84,6 @@ const HomePage: React.FC = () => {
     <Box>
       {/* Hero Section */}
       <Box textAlign="center" mb={6}>
-        <Typography variant="h2" component="h1" gutterBottom>
-          Welcome to Blanko Blog
-        </Typography>
         <Typography variant="h6" color="text.secondary" paragraph>
           Your space for ideas and insights
         </Typography>

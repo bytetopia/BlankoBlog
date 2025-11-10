@@ -105,7 +105,7 @@ const AdminPage: React.FC = () => {
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h4" component="h1">
+        <Typography variant="h5" component="h1">
           Admin Panel
         </Typography>
         <Button

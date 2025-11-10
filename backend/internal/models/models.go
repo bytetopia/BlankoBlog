@@ -48,6 +48,7 @@ type CreatePostRequest struct {
 	Title     string `json:"title" validate:"required,min=1,max=200"`
 	Content   string `json:"content" validate:"required,min=1"`
 	Summary   string `json:"summary"`
+	Slug      string `json:"slug,omitempty"`
 	Published bool   `json:"published"`
 }
 
@@ -56,6 +57,7 @@ type UpdatePostRequest struct {
 	Title     *string `json:"title,omitempty" validate:"omitempty,min=1,max=200"`
 	Content   *string `json:"content,omitempty" validate:"omitempty,min=1"`
 	Summary   *string `json:"summary,omitempty"`
+	Slug      *string `json:"slug,omitempty"`
 	Published *bool   `json:"published,omitempty"`
 }
 

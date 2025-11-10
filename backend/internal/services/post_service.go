@@ -75,19 +75,26 @@ func (s *PostService) GetPostBySlug(slug string, publishedOnly bool) (*models.Po
 
 // CreatePost creates a new blog post
 func (s *PostService) CreatePost(req models.CreatePostRequest) (*models.Post, error) {
-	slug := generateSlug(req.Title)
+	var slug string
 	
-	// Check if slug already exists
-	var existingPost models.Post
-	if err := s.db.Where("slug = ?", slug).First(&existingPost).Error; err == nil {
-		return nil, fmt.Errorf("slug already exists")
+	// Use user-provided slug if available, otherwise generate from title
+	if req.Slug != "" {
+		slug = sanitizeSlug(req.Slug)
+	} else {
+		slug = generateSlug(req.Title)
+	}
+	
+	// Ensure slug is unique
+	finalSlug, err := s.ensureUniqueSlug(slug)
+	if err != nil {
+		return nil, err
 	}
 
 	post := models.Post{
 		Title:     req.Title,
 		Content:   req.Content,
 		Summary:   req.Summary,
-		Slug:      slug,
+		Slug:      finalSlug,
 		Published: req.Published,
 	}
 
@@ -108,8 +115,24 @@ func (s *PostService) UpdatePost(id uint, req models.UpdatePostRequest) (*models
 	// Update fields if provided
 	if req.Title != nil {
 		post.Title = *req.Title
-		post.Slug = generateSlug(*req.Title)
+		// Only auto-generate slug if no custom slug was provided
+		if req.Slug == nil {
+			post.Slug = generateSlug(*req.Title)
+		}
 	}
+	
+	if req.Slug != nil {
+		newSlug := sanitizeSlug(*req.Slug)
+		// Ensure the new slug is unique (but allow keeping the same slug)
+		if newSlug != post.Slug {
+			finalSlug, err := s.ensureUniqueSlug(newSlug)
+			if err != nil {
+				return nil, err
+			}
+			post.Slug = finalSlug
+		}
+	}
+	
 	if req.Content != nil {
 		post.Content = *req.Content
 	}
@@ -137,10 +160,40 @@ func (s *PostService) DeletePost(id uint) error {
 	return s.db.Delete(&post).Error
 }
 
-// generateSlug creates a URL-friendly slug from a title
-func generateSlug(title string) string {
+// ensureUniqueSlug ensures the slug is unique by appending a number if needed
+func (s *PostService) ensureUniqueSlug(baseSlug string) (string, error) {
+	slug := baseSlug
+	counter := 1
+	
+	for {
+		var existingPost models.Post
+		err := s.db.Where("slug = ?", slug).First(&existingPost).Error
+		
+		if err == gorm.ErrRecordNotFound {
+			// Slug is unique
+			return slug, nil
+		}
+		
+		if err != nil {
+			// Database error
+			return "", err
+		}
+		
+		// Slug exists, try with a suffix
+		slug = fmt.Sprintf("%s-%d", baseSlug, counter)
+		counter++
+		
+		// Prevent infinite loops
+		if counter > 1000 {
+			return "", fmt.Errorf("unable to generate unique slug")
+		}
+	}
+}
+
+// sanitizeSlug cleans up a user-provided slug
+func sanitizeSlug(slug string) string {
 	// Convert to lowercase
-	slug := strings.ToLower(title)
+	slug = strings.ToLower(slug)
 	
 	// Replace spaces and special characters with hyphens
 	var result strings.Builder
@@ -162,5 +215,15 @@ func generateSlug(title string) string {
 		slug = strings.Trim(slug, "-")
 	}
 	
+	// Ensure slug is not empty
+	if slug == "" {
+		slug = "post"
+	}
+	
 	return slug
+}
+
+// generateSlug creates a URL-friendly slug from a title
+func generateSlug(title string) string {
+	return sanitizeSlug(title)
 }

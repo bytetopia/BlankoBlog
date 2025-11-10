@@ -63,6 +63,7 @@ export interface CreatePostRequest {
   title: string
   content: string
   summary?: string
+  slug?: string
   published: boolean
 }
 
@@ -70,6 +71,7 @@ export interface UpdatePostRequest {
   title?: string
   content?: string
   summary?: string
+  slug?: string
   published?: boolean
 }
 
