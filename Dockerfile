@@ -16,9 +16,12 @@ COPY frontend/ ./
 RUN npm run build
 
 # Backend build stage
-FROM golang:1.21-alpine AS backend-builder
+FROM golang:1.24-alpine AS backend-builder
 
 WORKDIR /app
+
+# Install build dependencies for CGO
+RUN apk --no-cache add gcc musl-dev sqlite-dev
 
 # Copy go mod and sum files
 COPY backend/go.mod backend/go.sum ./

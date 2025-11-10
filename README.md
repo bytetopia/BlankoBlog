@@ -65,7 +65,41 @@ BlankoBlog/
 - Node.js 18+
 - Docker & Docker Compose (optional)
 
-### Quick Start
+### Quick Start with Docker (Recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/bytetopia/BlankoBlog.git
+   cd BlankoBlog
+   ```
+
+2. **Build and run with Docker**
+   ```bash
+   # Quick build
+   ./scripts/build.sh
+
+   # Or use docker-compose
+   docker-compose up --build
+   ```
+
+   The application will be available at `http://localhost:8080`
+
+3. **Build and publish to Docker Hub**
+   ```bash
+   # Build only
+   ./scripts/build-and-publish.sh
+
+   # Build and push to Docker Hub
+   ./scripts/build-and-publish.sh --push
+
+   # Custom tag and push
+   ./scripts/build-and-publish.sh --tag v1.0.0 --push
+
+   # Custom repository
+   ./scripts/build-and-publish.sh --registry myuser/blankoblog --push
+   ```
+
+### Manual Development Setup
 
 1. **Clone the repository**
    ```bash
@@ -80,17 +114,24 @@ BlankoBlog/
    go run cmd/server/main.go
    ```
 
-3. **Frontend Setup**
+3. **Frontend Setup (in a separate terminal)**
    ```bash
    cd frontend
    npm install
-   npm start
+   npm run dev
    ```
 
-4. **Or use Docker Compose**
-   ```bash
-   docker-compose up --build
-   ```
+   For development, the frontend runs on `http://localhost:5173` and the backend on `http://localhost:8080`
+
+### Docker Architecture
+
+The project uses a single Docker image that:
+1. Builds the React frontend using Node.js
+2. Copies the frontend build artifacts to the Go backend's static directory
+3. Builds the Go backend application
+4. Serves both frontend and API from a single container on port 8080
+
+This unified approach simplifies deployment and reduces the number of containers needed.
 
 ### API Endpoints
 

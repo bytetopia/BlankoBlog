@@ -1,0 +1,36 @@
+# Development files
+.git/
+.gitignore
+README.md
+docs/
+scripts/
+
+# Node.js
+frontend/node_modules/
+frontend/.vite/
+frontend/dist/
+
+# Go
+backend/bin/
+backend/tmp/
+
+# Data and logs
+data/
+*.log
+
+# Docker files
+docker-compose*.yml
+Dockerfile.old
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.production

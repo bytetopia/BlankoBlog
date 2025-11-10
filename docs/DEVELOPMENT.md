@@ -5,9 +5,26 @@
 ### Prerequisites
 - Go 1.21 or later
 - Node.js 18 or later
+- Docker (for containerized development)
 - Git
 
 ### Quick Setup
+
+#### With Docker (Recommended)
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd BlankoBlog
+
+# Build and run with docker-compose
+docker-compose up --build
+
+# Or build manually
+./scripts/build.sh
+docker run -p 8080:8080 -v $(pwd)/data:/app/data blankoblog:latest
+```
+
+#### Manual Development
 ```bash
 # Clone the repository
 git clone <your-repo-url>
@@ -31,8 +48,7 @@ BlankoBlog/
 │   │   ├── models/         # Data models and DTOs
 │   │   ├── services/       # Business logic layer
 │   │   └── database/       # Database connection and migrations
-│   ├── pkg/                # Public packages (if needed)
-│   └── Dockerfile         # Docker configuration
+│   └── pkg/                # Public packages (if needed)
 ├── frontend/               # React frontend
 │   ├── src/
 │   │   ├── components/     # Reusable UI components
@@ -40,10 +56,82 @@ BlankoBlog/
 │   │   ├── services/       # API service layer
 │   │   ├── contexts/       # React contexts (auth, etc.)
 │   │   └── utils/          # Utility functions
-│   └── Dockerfile         # Docker configuration
+│   └── Dockerfile         # Frontend-only Docker configuration (legacy)
 ├── docs/                   # Documentation
 ├── scripts/                # Build and deployment scripts
-└── data/                   # SQLite database storage
+├── data/                   # SQLite database storage
+├── Dockerfile             # Unified production Docker configuration
+└── .dockerignore          # Docker ignore file
+```
+
+## Docker Architecture
+
+The project now uses a **unified Docker image** that combines both frontend and backend:
+
+### Multi-stage Build Process
+1. **Frontend Stage**: Builds the React application using Node.js
+2. **Backend Stage**: Builds the Go application and copies frontend assets
+3. **Final Stage**: Creates minimal Alpine-based image with the complete application
+
+### Benefits
+- Single container deployment
+- Simplified orchestration
+- Reduced resource usage
+- Faster startup times
+- Self-contained application
+
+## Build Scripts
+
+The project includes several scripts to streamline the build and deployment process:
+
+### `scripts/build.sh`
+Quick local build script:
+```bash
+# Build with default tag
+./scripts/build.sh
+
+# Build with custom tag
+./scripts/build.sh v1.0.0
+```
+
+### `scripts/build-and-publish.sh`
+Comprehensive build and publish script with multiple options:
+```bash
+# Show help
+./scripts/build-and-publish.sh --help
+
+# Build only
+./scripts/build-and-publish.sh
+
+# Build and push to Docker Hub
+./scripts/build-and-publish.sh --push
+
+# Build with custom tag and push
+./scripts/build-and-publish.sh --tag v1.0.0 --push
+
+# Use custom Docker Hub repository
+./scripts/build-and-publish.sh --registry myuser/blankoblog --push
+```
+
+#### Script Features
+- ✅ Docker availability check
+- ✅ Docker Hub authentication verification  
+- ✅ Colored output for better visibility
+- ✅ Comprehensive error handling
+- ✅ Image size reporting
+- ✅ Usage instructions after build
+- ✅ Flexible tagging options
+
+### Manual Docker Commands
+```bash
+# Build the image
+docker build -t blankoblog:latest .
+
+# Run locally
+docker run -p 8080:8080 -v $(pwd)/data:/app/data blankoblog:latest
+
+# Use docker-compose
+docker-compose up --build
 ```
 
 ## Development Workflow

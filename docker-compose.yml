@@ -1,34 +1,19 @@
 version: '3.8'
 
 services:
-  backend:
+  app:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
     volumes:
-      - ./backend:/app
       - ./data:/app/data
     environment:
       - ENV=development
       - DB_PATH=/app/data/blog.db
     depends_on:
       - db-init
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    environment:
-      - REACT_APP_API_URL=http://localhost:8080
-    depends_on:
-      - backend
 
   db-init:
     image: alpine:latest
@@ -37,4 +22,4 @@ services:
     command: sh -c "mkdir -p /data && touch /data/blog.db"
 
 volumes:
-  node_modules:
+  data:
