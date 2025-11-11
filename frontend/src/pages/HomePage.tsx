@@ -68,18 +68,22 @@ const HomePage: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
+      <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, mt: 4 }}>
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CircularProgress />
+        </Box>
       </Box>
     )
   }
 
   if (error) {
     return (
-      <Box textAlign="center" mt={4}>
-        <Typography color="error" variant="h6">
-          {error}
-        </Typography>
+      <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, mt: 4 }}>
+        <Box textAlign="center" mt={4}>
+          <Typography color="error" variant="h6">
+            {error}
+          </Typography>
+        </Box>
       </Box>
     )
   }

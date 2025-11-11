@@ -46,15 +46,17 @@ const TagsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" mt={4}>
-        <CircularProgress />
+      <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, mt: 4 }}>
+        <Box display="flex" justifyContent="center" mt={4}>
+          <CircularProgress />
+        </Box>
       </Box>
     )
   }
 
   if (error) {
     return (
-      <Box sx={{ maxWidth: 800, mx: 'auto', py: 4 }}>
+      <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, mt: 4 }}>
         <Link
           onClick={() => navigate('/')}
           sx={{ 
@@ -81,7 +83,7 @@ const TagsPage: React.FC = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 1000, mx: 'auto', py: 6, mt: 4 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, mt: 4 }}>
       {/* Back to Home Link */}
       <Link
         onClick={() => navigate('/')}
