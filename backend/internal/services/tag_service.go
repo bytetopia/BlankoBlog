@@ -165,6 +165,86 @@ func (s *TagService) CreateOrGetTagByName(name string) (*models.Tag, error) {
 	return s.CreateTag(createReq)
 }
 
+// GetAllTagsWithPostCount retrieves all tags with their post counts
+func (s *TagService) GetAllTagsWithPostCount() ([]models.TagWithPostCount, error) {
+	var tagsWithCounts []models.TagWithPostCount
+	
+	// Use raw SQL to get tags with post counts
+	err := s.db.Raw(`
+		SELECT 
+			t.id,
+			t.name,
+			t.color,
+			t.created_at,
+			t.updated_at,
+			COALESCE(pc.post_count, 0) as post_count
+		FROM tags t
+		LEFT JOIN (
+			SELECT 
+				pt.tag_id,
+				COUNT(DISTINCT p.id) as post_count
+			FROM post_tags pt
+			INNER JOIN posts p ON pt.post_id = p.id
+			WHERE p.deleted_at IS NULL AND p.published = true
+			GROUP BY pt.tag_id
+		) pc ON t.id = pc.tag_id
+		ORDER BY t.name
+	`).Scan(&tagsWithCounts).Error
+	
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch tags with post counts: %w", err)
+	}
+	
+	return tagsWithCounts, nil
+}
+
+// GetPostsByTag retrieves posts that have a specific tag with pagination
+func (s *TagService) GetPostsByTag(tagID uint, page, limit int, publishedOnly bool) ([]models.Post, int64, error) {
+	var posts []models.Post
+	var total int64
+	
+	// Base query to get posts with specific tag
+	query := s.db.Model(&models.Post{}).
+		Joins("JOIN post_tags ON posts.id = post_tags.post_id").
+		Where("post_tags.tag_id = ?", tagID).
+		Preload("Tags")
+	
+	// Filter for published posts if needed
+	if publishedOnly {
+		query = query.Where("published = ?", true)
+	}
+	
+	// Get total count
+	err := query.Count(&total).Error
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to count posts by tag: %w", err)
+	}
+	
+	// Get paginated results
+	offset := (page - 1) * limit
+	err = query.Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&posts).Error
+	
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to fetch posts by tag: %w", err)
+	}
+	
+	return posts, total, nil
+}
+
+// GetPostsByTagName retrieves posts that have a specific tag by tag name with pagination
+func (s *TagService) GetPostsByTagName(tagName string, page, limit int, publishedOnly bool) ([]models.Post, int64, error) {
+	// First get the tag by name
+	tag, err := s.GetTagByName(tagName)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	return s.GetPostsByTag(tag.ID, page, limit, publishedOnly)
+}
+
 // generateDefaultColor generates a default color based on tag name
 func (s *TagService) generateDefaultColor(name string) string {
 	// Simple color generation based on name hash

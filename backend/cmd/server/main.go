@@ -52,6 +52,9 @@ func main() {
 		api.GET("/posts", postHandler.GetPosts)
 		api.GET("/posts/:id", postHandler.GetPost)
 		api.GET("/tags", tagHandler.GetAllTags)
+		api.GET("/tags/with-counts", tagHandler.GetAllTagsWithPostCount)
+		api.GET("/tags/:id", tagHandler.GetTag)
+		api.GET("/tags/:id/posts", tagHandler.GetPostsByTag)
 
 		// Public config routes (for blog name, description, etc.)
 		api.GET("/config", settingsHandler.GetConfigs)
@@ -69,7 +72,6 @@ func main() {
 			
 			// Tag management routes (admin only)
 			protected.POST("/tags", tagHandler.CreateTag)
-			protected.GET("/tags/:id", tagHandler.GetTag)
 			protected.PUT("/tags/:id", tagHandler.UpdateTag)
 			protected.DELETE("/tags/:id", tagHandler.DeleteTag)
 			

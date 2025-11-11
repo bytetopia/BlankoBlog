@@ -131,6 +131,16 @@ type UpdateTagRequest struct {
 	Color *string `json:"color,omitempty"`
 }
 
+// TagWithPostCount represents a tag with its associated post count
+type TagWithPostCount struct {
+	ID        uint      `json:"id"`
+	Name      string    `json:"name"`
+	Color     string    `json:"color"`
+	PostCount int64     `json:"post_count"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 // ToResponse converts a Post to PostResponse
 func (p *Post) ToResponse() PostResponse {
 	return PostResponse{

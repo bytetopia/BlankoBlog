@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Chip } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import type { Tag } from '../services/api';
 
 interface TagListProps {
@@ -9,9 +10,20 @@ interface TagListProps {
 }
 
 const TagList: React.FC<TagListProps> = ({ tags, onTagClick, className = '' }) => {
+  const navigate = useNavigate();
+
   if (!tags || tags.length === 0) {
     return null;
   }
+
+  const handleTagClick = (tag: Tag) => {
+    if (onTagClick) {
+      onTagClick(tag);
+    } else {
+      // Default behavior: navigate to tag posts page
+      navigate(`/tags/${tag.id}/posts`);
+    }
+  };
 
   return (
     <Box 
@@ -26,14 +38,14 @@ const TagList: React.FC<TagListProps> = ({ tags, onTagClick, className = '' }) =
         <Chip
           key={tag.id}
           label={tag.name}
-          clickable={!!onTagClick}
-          onClick={() => onTagClick && onTagClick(tag)}
+          clickable
+          onClick={() => handleTagClick(tag)}
           sx={{
             backgroundColor: tag.color || '#1976d2',
             color: '#ffffff',
-            '&:hover': onTagClick ? {
+            '&:hover': {
               backgroundColor: tag.color ? `${tag.color}cc` : '#1565c0',
-            } : {},
+            },
             '& .MuiChip-label': {
               color: '#ffffff',
               fontWeight: 500,

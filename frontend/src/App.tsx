@@ -4,6 +4,8 @@ import { Container, CircularProgress, Box } from '@mui/material'
 import Navbar from './components/Navbar'
 import HomePage from './pages/HomePage'
 import PostPage from './pages/PostPage'
+import TagsPage from './pages/TagsPage'
+import TagPostsPage from './pages/TagPostsPage'
 import LoginPage from './pages/LoginPage'
 
 // Lazy load all admin functionality as a single chunk
@@ -42,6 +44,8 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/posts/:slug" element={<PostPage />} />
+            <Route path="/tags" element={<TagsPage />} />
+            <Route path="/tags/:tagId/posts" element={<TagPostsPage />} />
             <Route path="/login" element={<LoginPage />} />
           </Routes>
         </Container>

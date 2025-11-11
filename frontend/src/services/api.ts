@@ -53,6 +53,15 @@ export interface Tag {
   updated_at: string
 }
 
+export interface TagWithPostCount {
+  id: number
+  name: string
+  color: string
+  post_count: number
+  created_at: string
+  updated_at: string
+}
+
 export interface User {
   id: number
   username: string
@@ -164,8 +173,16 @@ export const tagsAPI = {
   getAllTags: () =>
     api.get<{ tags: Tag[] }>('/tags'),
 
+  getAllTagsWithPostCount: () =>
+    api.get<{ tags: TagWithPostCount[] }>('/tags/with-counts'),
+
   getTag: (id: number) =>
     api.get<{ tag: Tag }>(`/tags/${id}`),
+
+  getPostsByTag: (tagId: number, page = 1, limit = 10, published = true) =>
+    api.get<PaginatedPostsResponse>(`/tags/${tagId}/posts`, {
+      params: { page, limit, published },
+    }),
 
   createTag: (data: CreateTagRequest) =>
     api.post<{ tag: Tag }>('/tags', data),
