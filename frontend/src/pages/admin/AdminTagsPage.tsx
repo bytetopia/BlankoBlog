@@ -17,12 +17,14 @@ import {
 } from '@mui/material';
 import { Add, Edit, Delete } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { tagsAPI } from '../../services/api';
 import type { Tag, CreateTagRequest, UpdateTagRequest } from '../../services/api';
 import AdminNavbar from '../../components/AdminNavbar';
 
 const AdminTagsPage: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
+  useDocumentTitle('Manage Tags');
   const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

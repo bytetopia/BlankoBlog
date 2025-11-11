@@ -24,6 +24,7 @@ import {
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { postsAPI } from '../../services/api'
 import type { BlogPost } from '../../services/api'
 import AdminNavbar from '../../components/AdminNavbar'
@@ -31,6 +32,7 @@ import AdminNavbar from '../../components/AdminNavbar'
 const AdminPostsPage: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  useDocumentTitle('Manage Posts')
   
   const [posts, setPosts] = useState<BlogPost[]>([])
   const [loading, setLoading] = useState(true)

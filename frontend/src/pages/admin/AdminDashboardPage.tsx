@@ -15,11 +15,13 @@ import {
 } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import AdminNavbar from '../../components/AdminNavbar'
 
 const AdminDashboardPage: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
+  useDocumentTitle('Admin Dashboard')
 
   // Redirect if not authenticated
   useEffect(() => {

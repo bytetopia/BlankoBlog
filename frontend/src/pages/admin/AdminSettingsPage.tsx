@@ -13,6 +13,8 @@ import {
 import { Save, Lock, Settings as SettingsIcon } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { useSiteConfig } from '../../hooks/useSiteConfig'
 import { settingsAPI, type UpdateConfigRequest, type UpdatePasswordRequest } from '../../services/api'
 import AdminNavbar from '../../components/AdminNavbar'
 
@@ -52,6 +54,8 @@ function a11yProps(index: number) {
 const AdminSettingsPage: React.FC = () => {
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
+  const { refetchConfig } = useSiteConfig()
+  useDocumentTitle('Settings')
   const [tabValue, setTabValue] = useState(0)
   const [config, setConfig] = useState<Record<string, string>>({})
   const [configLoading, setConfigLoading] = useState(true)
@@ -117,6 +121,8 @@ const AdminSettingsPage: React.FC = () => {
       }
       
       await settingsAPI.updateConfig(updateRequest)
+      // Refresh the global site config cache
+      await refetchConfig()
       showSnackbar('Blog settings saved successfully!', 'success')
     } catch (error) {
       console.error('Failed to save config:', error)

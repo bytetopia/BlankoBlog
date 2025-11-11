@@ -16,6 +16,7 @@ import {
 import { ArrowBack, Save } from '@mui/icons-material'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { postsAPI } from '../../services/api'
 import type { CreatePostRequest, UpdatePostRequest, Tag } from '../../services/api'
 import TagInput from '../../components/TagInput'
@@ -44,6 +45,7 @@ const PostEditorPage: React.FC = () => {
 
   const isEditing = Boolean(id && id !== 'new')
   const pageTitle = isEditing ? 'Edit Post' : 'Create New Post'
+  useDocumentTitle(pageTitle)
 
   // Function to generate slug from title
   const generateSlugFromTitle = (title: string): string => {
