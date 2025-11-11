@@ -14,12 +14,14 @@ import (
 )
 
 type AuthHandler struct {
-	userService *services.UserService
+	userService   *services.UserService
+	configService *services.ConfigService
 }
 
 func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	return &AuthHandler{
-		userService: services.NewUserService(db),
+		userService:   services.NewUserService(db),
+		configService: services.NewConfigService(db),
 	}
 }
 
@@ -43,7 +45,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Generate JWT token
-	token, err := generateJWT(user.ID)
+	token, err := h.generateJWT(user.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
@@ -84,7 +86,7 @@ func (h *AuthHandler) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		claims, err := validateJWT(tokenString)
+		claims, err := h.validateJWT(tokenString)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
@@ -107,10 +109,15 @@ func (h *AuthHandler) AuthMiddleware() gin.HandlerFunc {
 }
 
 // generateJWT creates a new JWT token for the user
-func generateJWT(userID uint) (string, error) {
+func (h *AuthHandler) generateJWT(userID uint) (string, error) {
 	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey == "" {
-		secretKey = "your-secret-key-change-this-in-production" // Default for development
+		// Get JWT secret from database, or generate if not exists
+		var err error
+		secretKey, err = h.configService.GetJWTSecret()
+		if err != nil {
+			return "", err
+		}
 	}
 
 	claims := jwt.MapClaims{
@@ -124,10 +131,15 @@ func generateJWT(userID uint) (string, error) {
 }
 
 // validateJWT validates a JWT token and returns the claims
-func validateJWT(tokenString string) (jwt.MapClaims, error) {
+func (h *AuthHandler) validateJWT(tokenString string) (jwt.MapClaims, error) {
 	secretKey := os.Getenv("JWT_SECRET")
 	if secretKey == "" {
-		secretKey = "your-secret-key-change-this-in-production" // Default for development
+		// Get JWT secret from database, or generate if not exists
+		var err error
+		secretKey, err = h.configService.GetJWTSecret()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {

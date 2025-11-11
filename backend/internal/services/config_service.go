@@ -1,6 +1,8 @@
 package services
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 
 	"gorm.io/gorm"
@@ -91,6 +93,7 @@ func (s *ConfigService) setDefaultConfigs(configMap map[string]string) {
 		"blog_name":         "Blanko Blog",
 		"blog_description":  "A simple and elegant blog platform",
 		"blog_introduction": "Welcome to our blog where we share insights, stories, and knowledge.",
+		"jwt_secret":        "", // Will be generated if not present
 	}
 
 	for key, defaultValue := range defaults {
@@ -106,6 +109,7 @@ func (s *ConfigService) getDefaultValue(key string) string {
 		"blog_name":         "Blanko Blog",
 		"blog_description":  "A simple and elegant blog platform",
 		"blog_introduction": "Welcome to our blog where we share insights, stories, and knowledge.",
+		"jwt_secret":        "", // Will be generated if not present
 	}
 
 	return defaults[key]
@@ -129,6 +133,11 @@ func (s *ConfigService) InitializeDefaultConfigs() error {
 			Value:       "Welcome to our blog where we share insights, stories, and knowledge.",
 			Description: "An introduction text displayed on the homepage",
 		},
+		"jwt_secret": {
+			Key:         "jwt_secret",
+			Value:       "", // Will be generated in GetJWTSecret method
+			Description: "Secret key used for JWT token signing",
+		},
 	}
 
 	return s.db.Transaction(func(tx *gorm.DB) error {
@@ -144,4 +153,43 @@ func (s *ConfigService) InitializeDefaultConfigs() error {
 		}
 		return nil
 	})
+}
+
+// GetJWTSecret retrieves or generates the JWT secret key
+func (s *ConfigService) GetJWTSecret() (string, error) {
+	// Try to get existing JWT secret from database
+	secret, err := s.GetConfig("jwt_secret")
+	if err != nil && err.Error() != "configuration not found" {
+		return "", err
+	}
+
+	// If secret exists and is not empty, return it
+	if secret != "" {
+		return secret, nil
+	}
+
+	// Generate a new random JWT secret
+	newSecret, err := s.generateRandomSecret(32) // 256-bit secret
+	if err != nil {
+		return "", err
+	}
+
+	// Save the new secret to database
+	err = s.UpdateConfigs(map[string]string{
+		"jwt_secret": newSecret,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return newSecret, nil
+}
+
+// generateRandomSecret generates a cryptographically secure random string
+func (s *ConfigService) generateRandomSecret(length int) (string, error) {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(bytes), nil
 }
