@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: bytetopia/blankoblog:latest
     ports:
       - "8080:8080"
     volumes:
@@ -12,14 +10,6 @@ services:
     environment:
       - ENV=development
       - DB_PATH=/app/data/blog.db
-    depends_on:
-      - db-init
-
-  db-init:
-    image: alpine:latest
-    volumes:
-      - ./data:/data
-    command: sh -c "mkdir -p /data && touch /data/blog.db"
 
 volumes:
   data:
