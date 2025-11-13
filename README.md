@@ -133,15 +133,6 @@ The project uses a single Docker image that:
 
 This unified approach simplifies deployment and reduces the number of containers needed.
 
-### API Endpoints
-
-- `GET /api/posts` - Get all blog posts
-- `GET /api/posts/:id` - Get specific blog post
-- `POST /api/auth/login` - Admin login
-- `POST /api/posts` - Create new post (admin)
-- `PUT /api/posts/:id` - Update post (admin)
-- `DELETE /api/posts/:id` - Delete post (admin)
-
 ## Development Guidelines
 
 - Follow Go best practices and project layout standards

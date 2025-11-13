@@ -6,10 +6,16 @@ http://localhost:8080/api
 ```
 
 ## Authentication
-Most endpoints require JWT authentication. Include the token in the Authorization header:
+Admin endpoints require JWT authentication. Include the token in the Authorization header:
 ```
 Authorization: Bearer <your-jwt-token>
 ```
+
+## API Structure
+
+- **Public endpoints**: `/api/public/*` - No authentication required
+- **Admin endpoints**: `/api/admin/*` - Authentication required
+- **Auth endpoints**: `/api/auth/*` - Authentication endpoints
 
 ## Endpoints
 
@@ -39,9 +45,9 @@ Login with admin credentials.
 }
 ```
 
-### Blog Posts
+### Public Blog Posts
 
-#### GET /posts
+#### GET /public/posts
 Get paginated list of published blog posts.
 
 **Query Parameters:**
@@ -73,8 +79,8 @@ Get paginated list of published blog posts.
 }
 ```
 
-#### GET /posts/:id
-Get a specific blog post by ID or slug.
+#### GET /public/posts/:id
+Get a specific blog post by ID or slug (increments view count).
 
 **Response:**
 ```json
@@ -90,7 +96,33 @@ Get a specific blog post by ID or slug.
 }
 ```
 
-#### POST /posts (Admin Only)
+#### GET /public/tags
+Get all tags.
+
+#### GET /public/tags/with-counts
+Get all tags with post counts.
+
+#### GET /public/tags/:id
+Get a specific tag.
+
+#### GET /public/tags/:id/posts
+Get posts by tag ID.
+
+#### GET /public/config
+Get public blog configuration (name, description, etc.).
+
+#### POST /public/comments
+Create a new comment on a post.
+
+#### GET /public/posts/:id/comments
+Get approved comments for a specific post.
+
+### Admin Blog Posts
+
+#### GET /admin/posts/:id
+Get a specific blog post by ID or slug (admin view, no view count increment).
+
+#### POST /admin/posts
 Create a new blog post.
 
 **Request Body:**
@@ -117,7 +149,7 @@ Create a new blog post.
 }
 ```
 
-#### PUT /posts/:id (Admin Only)
+#### PUT /admin/posts/:id
 Update an existing blog post.
 
 **Request Body:**
@@ -130,7 +162,7 @@ Update an existing blog post.
 }
 ```
 
-#### DELETE /posts/:id (Admin Only)
+#### DELETE /admin/posts/:id
 Delete a blog post (soft delete).
 
 **Response:**
@@ -139,6 +171,42 @@ Delete a blog post (soft delete).
   "message": "Post deleted successfully"
 }
 ```
+
+### Admin Tags
+
+#### POST /admin/tags
+Create a new tag.
+
+#### PUT /admin/tags/:id
+Update an existing tag.
+
+#### DELETE /admin/tags/:id
+Delete a tag.
+
+### Admin Comments
+
+#### GET /admin/comments/list
+Get all comments for admin management.
+
+#### GET /admin/comments/stats
+Get comment statistics.
+
+#### GET /admin/comments/:id
+Get a specific comment for admin.
+
+#### PUT /admin/comments/:id/status
+Update comment status.
+
+#### DELETE /admin/comments/:id
+Delete a comment.
+
+### Admin Settings
+
+#### PUT /admin/settings/config
+Update blog configuration.
+
+#### PUT /admin/settings/password
+Update admin password.
 
 ## Error Responses
 

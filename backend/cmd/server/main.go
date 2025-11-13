@@ -52,51 +52,51 @@ func main() {
 	api := r.Group("/api")
 	{
 		// Public routes
-		api.GET("/posts", postHandler.GetPosts)
-		api.GET("/public/posts/:id", postHandler.GetPublicPost) // Public post detail with view count increment
-		api.GET("/tags", tagHandler.GetAllTags)
-		api.GET("/tags/with-counts", tagHandler.GetAllTagsWithPostCount)
-		api.GET("/tags/:id", tagHandler.GetTag)
-		api.GET("/tags/:id/posts", tagHandler.GetPostsByTag)
+		public := api.Group("/public")
+		{
+			public.GET("/posts", postHandler.GetPosts)
+			public.GET("/posts/:id", postHandler.GetPublicPost) // Public post detail with view count increment
+			public.GET("/tags", tagHandler.GetAllTags)
+			public.GET("/tags/with-counts", tagHandler.GetAllTagsWithPostCount)
+			public.GET("/tags/:id", tagHandler.GetTag)
+			public.GET("/tags/:id/posts", tagHandler.GetPostsByTag)
 
-		// Public config routes (for blog name, description, etc.)
-		api.GET("/config", settingsHandler.GetConfigs)
+			// Public config routes (for blog name, description, etc.)
+			public.GET("/config", settingsHandler.GetConfigs)
 
-		// Public comment routes
-		api.POST("/comments", commentHandler.CreateComment)
-		api.GET("/posts/:id/comments", commentHandler.GetCommentsByPostID)
+			// Public comment routes
+			public.POST("/comments", commentHandler.CreateComment)
+			public.GET("/posts/:id/comments", commentHandler.GetCommentsByPostID)
+		}
 
-		// Auth routes
+		// Auth routes (separate from public/admin)
 		api.POST("/auth/login", authHandler.Login)
 
-		// Protected routes (admin only)
-		protected := api.Group("/")
-		protected.Use(authHandler.AuthMiddleware())
+		// Protected admin routes
+		admin := api.Group("/admin")
+		admin.Use(authHandler.AuthMiddleware())
 		{
-			// Admin-only post routes (no view count increment)
-			protected.GET("/admin/posts/:id", postHandler.GetAdminPost) // Admin post detail without view count increment
-			protected.POST("/posts", postHandler.CreatePost)
-			protected.PUT("/posts/:id", postHandler.UpdatePost)
-			protected.DELETE("/posts/:id", postHandler.DeletePost)
+			// Admin post routes (no view count increment)
+			admin.GET("/posts/:id", postHandler.GetAdminPost) // Admin post detail without view count increment
+			admin.POST("/posts", postHandler.CreatePost)
+			admin.PUT("/posts/:id", postHandler.UpdatePost)
+			admin.DELETE("/posts/:id", postHandler.DeletePost)
 			
 			// Tag management routes (admin only)
-			protected.POST("/tags", tagHandler.CreateTag)
-			protected.PUT("/tags/:id", tagHandler.UpdateTag)
-			protected.DELETE("/tags/:id", tagHandler.DeleteTag)
+			admin.POST("/tags", tagHandler.CreateTag)
+			admin.PUT("/tags/:id", tagHandler.UpdateTag)
+			admin.DELETE("/tags/:id", tagHandler.DeleteTag)
 			
 			// Comment management routes (admin only)
-			protected.GET("/admin/comments/list", commentHandler.GetAllCommentsForAdmin)
-			protected.GET("/admin/comments/stats", commentHandler.GetCommentStats)
-			protected.GET("/admin/comments/:id", commentHandler.GetCommentForAdmin)
-			protected.PUT("/admin/comments/:id/status", commentHandler.UpdateCommentStatus)
-			protected.DELETE("/admin/comments/:id", commentHandler.DeleteComment)
+			admin.GET("/comments/list", commentHandler.GetAllCommentsForAdmin)
+			admin.GET("/comments/stats", commentHandler.GetCommentStats)
+			admin.GET("/comments/:id", commentHandler.GetCommentForAdmin)
+			admin.PUT("/comments/:id/status", commentHandler.UpdateCommentStatus)
+			admin.DELETE("/comments/:id", commentHandler.DeleteComment)
 			
 			// Settings routes
-			settings := protected.Group("/settings")
-			{
-				settings.PUT("/config", settingsHandler.UpdateConfigs)
-				settings.PUT("/password", settingsHandler.UpdatePassword)
-			}
+			admin.PUT("/settings/config", settingsHandler.UpdateConfigs)
+			admin.PUT("/settings/password", settingsHandler.UpdatePassword)
 		}
 	}
 

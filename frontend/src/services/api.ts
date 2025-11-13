@@ -182,7 +182,7 @@ export const authAPI = {
 // Posts API
 export const postsAPI = {
   getPosts: (page = 1, limit = 10, published = true) =>
-    api.get<PaginatedPostsResponse>('/posts', {
+    api.get<PaginatedPostsResponse>('/public/posts', {
       params: { page, limit, published },
     }),
   
@@ -195,61 +195,61 @@ export const postsAPI = {
     api.get<BlogPost>(`/admin/posts/${idOrSlug}`),
   
   createPost: (data: CreatePostRequest) =>
-    api.post<BlogPost>('/posts', data),
+    api.post<BlogPost>('/admin/posts', data),
   
   updatePost: (id: number, data: UpdatePostRequest) =>
-    api.put<BlogPost>(`/posts/${id}`, data),
+    api.put<BlogPost>(`/admin/posts/${id}`, data),
   
   deletePost: (id: number) =>
-    api.delete(`/posts/${id}`),
+    api.delete(`/admin/posts/${id}`),
 }
 
 // Settings API
 export const settingsAPI = {
   getConfig: () =>
-    api.get<Config>('/config'),
+    api.get<Config>('/public/config'),
 
   updateConfig: (data: UpdateConfigRequest) =>
-    api.put('/settings/config', data),
+    api.put('/admin/settings/config', data),
 
   updatePassword: (data: UpdatePasswordRequest) =>
-    api.put('/settings/password', data),
+    api.put('/admin/settings/password', data),
 }
 
 // Tags API
 export const tagsAPI = {
   getAllTags: () =>
-    api.get<{ tags: Tag[] }>('/tags'),
+    api.get<{ tags: Tag[] }>('/public/tags'),
 
   getAllTagsWithPostCount: () =>
-    api.get<{ tags: TagWithPostCount[] }>('/tags/with-counts'),
+    api.get<{ tags: TagWithPostCount[] }>('/public/tags/with-counts'),
 
   getTag: (id: number) =>
-    api.get<{ tag: Tag }>(`/tags/${id}`),
+    api.get<{ tag: Tag }>(`/public/tags/${id}`),
 
   getPostsByTag: (tagId: number, page = 1, limit = 10, published = true) =>
-    api.get<PaginatedPostsResponse>(`/tags/${tagId}/posts`, {
+    api.get<PaginatedPostsResponse>(`/public/tags/${tagId}/posts`, {
       params: { page, limit, published },
     }),
 
   createTag: (data: CreateTagRequest) =>
-    api.post<{ tag: Tag }>('/tags', data),
+    api.post<{ tag: Tag }>('/admin/tags', data),
 
   updateTag: (id: number, data: UpdateTagRequest) =>
-    api.put<{ tag: Tag }>(`/tags/${id}`, data),
+    api.put<{ tag: Tag }>(`/admin/tags/${id}`, data),
 
   deleteTag: (id: number) =>
-    api.delete(`/tags/${id}`),
+    api.delete(`/admin/tags/${id}`),
 }
 
 // Comments API
 export const commentsAPI = {
   // Public endpoints
   createComment: (data: CreateCommentRequest) =>
-    api.post<{ message: string; comment: Comment }>('/comments', data),
+    api.post<{ message: string; comment: Comment }>('/public/comments', data),
 
   getCommentsByPostId: (postId: number) =>
-    api.get<{ comments: Comment[] }>(`/posts/${postId}/comments`),
+    api.get<{ comments: Comment[] }>(`/public/posts/${postId}/comments`),
 
   // Admin endpoints
   getAllCommentsForAdmin: (page = 1, limit = 20, status?: string) =>
