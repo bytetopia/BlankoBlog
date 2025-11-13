@@ -40,6 +40,7 @@ export interface BlogPost {
   summary: string
   slug: string
   published: boolean
+  view_count: number
   tags: Tag[]
   created_at: string
   updated_at: string
@@ -143,8 +144,13 @@ export const postsAPI = {
       params: { page, limit, published },
     }),
   
-  getPost: (idOrSlug: string | number) =>
-    api.get<BlogPost>(`/posts/${idOrSlug}`),
+  // Public post endpoint with view count increment
+  getPublicPost: (idOrSlug: string | number) =>
+    api.get<BlogPost>(`/public/posts/${idOrSlug}`),
+  
+  // Admin post endpoint without view count increment
+  getAdminPost: (idOrSlug: string | number) =>
+    api.get<BlogPost>(`/admin/posts/${idOrSlug}`),
   
   createPost: (data: CreatePostRequest) =>
     api.post<BlogPost>('/posts', data),

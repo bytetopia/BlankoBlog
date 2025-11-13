@@ -84,6 +84,72 @@ func (h *PostHandler) GetPost(c *gin.Context) {
 	c.JSON(http.StatusOK, post.ToResponse())
 }
 
+// GetPublicPost handles GET /api/public/posts/:id (with view count increment)
+func (h *PostHandler) GetPublicPost(c *gin.Context) {
+	idParam := c.Param("id")
+
+	// Try to parse as ID first, then as slug
+	if id, err := strconv.ParseUint(idParam, 10, 32); err == nil {
+		post, err := h.postService.GetPostByIDAndIncrementViews(uint(id), true)
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch post"})
+			return
+		}
+		c.JSON(http.StatusOK, post.ToResponse())
+		return
+	}
+
+	// Try as slug
+	post, err := h.postService.GetPostBySlugAndIncrementViews(idParam, true)
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch post"})
+		return
+	}
+
+	c.JSON(http.StatusOK, post.ToResponse())
+}
+
+// GetAdminPost handles GET /api/admin/posts/:id (admin only, no view count increment)
+func (h *PostHandler) GetAdminPost(c *gin.Context) {
+	idParam := c.Param("id")
+
+	// Try to parse as ID first, then as slug
+	if id, err := strconv.ParseUint(idParam, 10, 32); err == nil {
+		post, err := h.postService.GetPostByID(uint(id), false) // Admin can see unpublished posts
+		if err != nil {
+			if err == gorm.ErrRecordNotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch post"})
+			return
+		}
+		c.JSON(http.StatusOK, post.ToResponse())
+		return
+	}
+
+	// Try as slug
+	post, err := h.postService.GetPostBySlug(idParam, false) // Admin can see unpublished posts
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch post"})
+		return
+	}
+
+	c.JSON(http.StatusOK, post.ToResponse())
+}
+
 // CreatePost handles POST /api/posts (admin only)
 func (h *PostHandler) CreatePost(c *gin.Context) {
 	var req models.CreatePostRequest

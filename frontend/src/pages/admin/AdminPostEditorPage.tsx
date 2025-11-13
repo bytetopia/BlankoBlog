@@ -71,7 +71,7 @@ const PostEditorPage: React.FC = () => {
       if (isEditing && id) {
         try {
           setLoading(true)
-          const response = await postsAPI.getPost(parseInt(id))
+          const response = await postsAPI.getAdminPost(parseInt(id))
           const postData = response.data
           setPost({
             title: postData.title,

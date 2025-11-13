@@ -5,7 +5,7 @@ import {
   CircularProgress,
   Link,
 } from '@mui/material'
-import { ArrowBack, CalendarToday, AccessTime } from '@mui/icons-material'
+import { ArrowBack, CalendarToday, AccessTime, Visibility } from '@mui/icons-material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { postsAPI } from '../services/api'
 import type { BlogPost } from '../services/api'
@@ -30,7 +30,7 @@ const PostPage: React.FC = () => {
 
       try {
         setLoading(true)
-        const response = await postsAPI.getPost(slug)
+        const response = await postsAPI.getPublicPost(slug)
         setPost(response.data)
       } catch (err: any) {
         if (err.response?.status === 404) {
@@ -160,6 +160,14 @@ const PostPage: React.FC = () => {
             </Typography>
           </Box>
         )}
+
+        {/* View Count */}
+        <Box display="flex" alignItems="center">
+          <Visibility fontSize="small" color="action" />
+          <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+            Views: {post.view_count.toLocaleString()}
+          </Typography>
+        </Box>
       </Box>
 
       {/* Tags */}

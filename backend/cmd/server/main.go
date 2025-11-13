@@ -50,7 +50,7 @@ func main() {
 	{
 		// Public routes
 		api.GET("/posts", postHandler.GetPosts)
-		api.GET("/posts/:id", postHandler.GetPost)
+		api.GET("/public/posts/:id", postHandler.GetPublicPost) // Public post detail with view count increment
 		api.GET("/tags", tagHandler.GetAllTags)
 		api.GET("/tags/with-counts", tagHandler.GetAllTagsWithPostCount)
 		api.GET("/tags/:id", tagHandler.GetTag)
@@ -66,6 +66,8 @@ func main() {
 		protected := api.Group("/")
 		protected.Use(authHandler.AuthMiddleware())
 		{
+			// Admin-only post routes (no view count increment)
+			protected.GET("/admin/posts/:id", postHandler.GetAdminPost) // Admin post detail without view count increment
 			protected.POST("/posts", postHandler.CreatePost)
 			protected.PUT("/posts/:id", postHandler.UpdatePost)
 			protected.DELETE("/posts/:id", postHandler.DeletePost)

@@ -14,6 +14,7 @@ type Post struct {
 	Summary   string         `json:"summary" gorm:"size:500"`
 	Slug      string         `json:"slug" gorm:"uniqueIndex;not null"`
 	Published bool           `json:"published" gorm:"default:false"`
+	ViewCount uint           `json:"view_count" gorm:"default:0"`
 	Tags      []Tag          `json:"tags" gorm:"many2many:post_tags;"`
 	CreatedAt time.Time      `json:"created_at"`
 	UpdatedAt time.Time      `json:"updated_at"`
@@ -61,6 +62,7 @@ type PostResponse struct {
 	Summary   string    `json:"summary"`
 	Slug      string    `json:"slug"`
 	Published bool      `json:"published"`
+	ViewCount uint      `json:"view_count"`
 	Tags      []Tag     `json:"tags"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -150,6 +152,7 @@ func (p *Post) ToResponse() PostResponse {
 		Summary:   p.Summary,
 		Slug:      p.Slug,
 		Published: p.Published,
+		ViewCount: p.ViewCount,
 		Tags:      p.Tags,
 		CreatedAt: p.CreatedAt,
 		UpdatedAt: p.UpdatedAt,

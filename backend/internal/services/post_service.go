@@ -198,6 +198,67 @@ func (s *PostService) UpdatePost(id uint, req models.UpdatePostRequest) (*models
 	return &post, nil
 }
 
+// IncrementViewCount increments the view count for a post
+func (s *PostService) IncrementViewCount(id uint) error {
+	return s.db.Model(&models.Post{}).Where("id = ?", id).UpdateColumn("view_count", gorm.Expr("view_count + 1")).Error
+}
+
+// GetPostByIDAndIncrementViews retrieves a post by ID and increments view count
+func (s *PostService) GetPostByIDAndIncrementViews(id uint, publishedOnly bool) (*models.Post, error) {
+	var post models.Post
+	query := s.db.Preload("Tags")
+
+	if publishedOnly {
+		query = query.Where("published = ?", true)
+	}
+
+	if err := query.First(&post, id).Error; err != nil {
+		return nil, err
+	}
+
+	// Increment view count in a separate transaction
+	if err := s.IncrementViewCount(id); err != nil {
+		// Log the error but don't fail the request
+		// The post retrieval is more important than the view count increment
+		return &post, nil
+	}
+
+	// Reload post to get the updated view count
+	if err := query.First(&post, id).Error; err != nil {
+		return nil, err
+	}
+
+	return &post, nil
+}
+
+// GetPostBySlugAndIncrementViews retrieves a post by slug and increments view count
+func (s *PostService) GetPostBySlugAndIncrementViews(slug string, publishedOnly bool) (*models.Post, error) {
+	var post models.Post
+	query := s.db.Preload("Tags").Where("slug = ?", slug)
+
+	if publishedOnly {
+		query = query.Where("published = ?", true)
+	}
+
+	if err := query.First(&post).Error; err != nil {
+		return nil, err
+	}
+
+	// Increment view count in a separate transaction
+	if err := s.IncrementViewCount(post.ID); err != nil {
+		// Log the error but don't fail the request
+		// The post retrieval is more important than the view count increment
+		return &post, nil
+	}
+
+	// Reload post to get the updated view count
+	if err := query.First(&post).Error; err != nil {
+		return nil, err
+	}
+
+	return &post, nil
+}
+
 // DeletePost soft deletes a blog post
 func (s *PostService) DeletePost(id uint) error {
 	var post models.Post
