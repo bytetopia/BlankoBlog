@@ -9,7 +9,7 @@ import {
   CircularProgress,
   Link,
 } from '@mui/material'
-import { LocalOffer } from '@mui/icons-material'
+import { LocalOffer, RssFeed } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { postsAPI } from '../services/api'
 import type { BlogPost, PaginatedPostsResponse } from '../services/api'
@@ -181,34 +181,56 @@ const HomePage: React.FC = () => {
         </>
       )}
 
-      {/* Tags Link */}
+      {/* Footer Links */}
       <Box 
         sx={{ 
           mt: 6, 
           pt: 4, 
           borderTop: 1, 
           borderColor: 'divider',
-          textAlign: 'center'
+          textAlign: 'left'
         }}
       >
-        <Link
-          onClick={() => navigate('/tags')}
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            color: 'primary.main',
-            textDecoration: 'none',
-            fontSize: '1.1rem',
-            fontWeight: 500,
-            cursor: 'pointer',
-            '&:hover': {
-              textDecoration: 'underline',
-            }
-          }}
-        >
-          <LocalOffer sx={{ mr: 1 }} fontSize="small" />
-          Browse All Tags
-        </Link>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 3, flexWrap: 'wrap' }}>
+          <Link
+            onClick={() => navigate('/tags')}
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              color: 'primary.main',
+              textDecoration: 'none',
+              fontSize: '1.1rem',
+              fontWeight: 500,
+              cursor: 'pointer',
+              '&:hover': {
+                textDecoration: 'underline',
+              }
+            }}
+          >
+            <LocalOffer sx={{ mr: 1 }} fontSize="small" />
+            Browse All Tags
+          </Link>
+          
+          <Link
+            href="/rss.xml"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              color: 'primary.main',
+              textDecoration: 'none',
+              fontSize: '1.1rem',
+              fontWeight: 500,
+              '&:hover': {
+                textDecoration: 'underline',
+              }
+            }}
+          >
+            <RssFeed sx={{ mr: 1 }} fontSize="small" />
+            RSS Feed
+          </Link>
+        </Box>
       </Box>
     </Box>
   )

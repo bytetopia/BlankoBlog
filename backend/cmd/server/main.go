@@ -35,6 +35,7 @@ func main() {
 	configService := services.NewConfigService(db)
 	tagService := services.NewTagService(db)
 	commentService := services.NewCommentService(db)
+	rssService := services.NewRSSService(db, configService)
 
 	// Initialize default configurations
 	if err := configService.InitializeDefaultConfigs(); err != nil {
@@ -47,6 +48,7 @@ func main() {
 	settingsHandler := handlers.NewSettingsHandler(configService, userService, db)
 	tagHandler := handlers.NewTagHandler(tagService)
 	commentHandler := handlers.NewCommentHandler(commentService)
+	rssHandler := handlers.NewRSSHandler(rssService)
 
 	// API routes
 	api := r.Group("/api")
@@ -99,6 +101,12 @@ func main() {
 			admin.PUT("/settings/password", settingsHandler.UpdatePassword)
 		}
 	}
+
+	// RSS feed endpoints (outside of /api to follow standard RSS conventions)
+	r.GET("/rss", rssHandler.GetRSSFeed)
+	r.GET("/rss.xml", rssHandler.GetRSSFeed)
+	r.GET("/feed", rssHandler.GetRSSFeed)
+	r.GET("/feed.xml", rssHandler.GetRSSFeed)
 
 	// Serve static files (frontend)
 	r.Static("/static", "./static")
