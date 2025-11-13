@@ -27,12 +27,14 @@ func main() {
 	config.AllowOrigins = []string{"http://localhost:3000", "http://localhost:5173"} // React dev servers
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{"Origin", "Content-Type", "Accept", "Authorization"}
+	config.AllowCredentials = true
 	r.Use(cors.New(config))
 
 	// Initialize services
 	userService := services.NewUserService(db)
 	configService := services.NewConfigService(db)
 	tagService := services.NewTagService(db)
+	commentService := services.NewCommentService(db)
 
 	// Initialize default configurations
 	if err := configService.InitializeDefaultConfigs(); err != nil {
@@ -44,6 +46,7 @@ func main() {
 	authHandler := handlers.NewAuthHandler(db)
 	settingsHandler := handlers.NewSettingsHandler(configService, userService, db)
 	tagHandler := handlers.NewTagHandler(tagService)
+	commentHandler := handlers.NewCommentHandler(commentService)
 
 	// API routes
 	api := r.Group("/api")
@@ -58,6 +61,10 @@ func main() {
 
 		// Public config routes (for blog name, description, etc.)
 		api.GET("/config", settingsHandler.GetConfigs)
+
+		// Public comment routes
+		api.POST("/comments", commentHandler.CreateComment)
+		api.GET("/posts/:id/comments", commentHandler.GetCommentsByPostID)
 
 		// Auth routes
 		api.POST("/auth/login", authHandler.Login)
@@ -76,6 +83,13 @@ func main() {
 			protected.POST("/tags", tagHandler.CreateTag)
 			protected.PUT("/tags/:id", tagHandler.UpdateTag)
 			protected.DELETE("/tags/:id", tagHandler.DeleteTag)
+			
+			// Comment management routes (admin only)
+			protected.GET("/admin/comments/list", commentHandler.GetAllCommentsForAdmin)
+			protected.GET("/admin/comments/stats", commentHandler.GetCommentStats)
+			protected.GET("/admin/comments/:id", commentHandler.GetCommentForAdmin)
+			protected.PUT("/admin/comments/:id/status", commentHandler.UpdateCommentStatus)
+			protected.DELETE("/admin/comments/:id", commentHandler.DeleteComment)
 			
 			// Settings routes
 			settings := protected.Group("/settings")

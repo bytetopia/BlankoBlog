@@ -63,6 +63,48 @@ export interface TagWithPostCount {
   updated_at: string
 }
 
+export interface Comment {
+  id: number
+  post_id: number
+  name: string
+  email?: string
+  content: string
+  status: string
+  created_at: string
+}
+
+export interface CommentAdmin {
+  id: number
+  post_id: number
+  post_title?: string
+  name: string
+  email: string
+  content: string
+  status: string
+  ip_address: string
+  referer: string
+  created_at: string
+  updated_at: string
+}
+
+export interface CreateCommentRequest {
+  post_id: number
+  name: string
+  email?: string
+  content: string
+}
+
+export interface UpdateCommentStatusRequest {
+  status: 'pending' | 'approved' | 'hidden'
+}
+
+export interface CommentStats {
+  pending: number
+  approved: number
+  hidden: number
+  total: number
+}
+
 export interface User {
   id: number
   username: string
@@ -198,4 +240,40 @@ export const tagsAPI = {
 
   deleteTag: (id: number) =>
     api.delete(`/tags/${id}`),
+}
+
+// Comments API
+export const commentsAPI = {
+  // Public endpoints
+  createComment: (data: CreateCommentRequest) =>
+    api.post<{ message: string; comment: Comment }>('/comments', data),
+
+  getCommentsByPostId: (postId: number) =>
+    api.get<{ comments: Comment[] }>(`/posts/${postId}/comments`),
+
+  // Admin endpoints
+  getAllCommentsForAdmin: (page = 1, limit = 20, status?: string) =>
+    api.get<{ 
+      comments: CommentAdmin[]; 
+      pagination: { 
+        current_page: number; 
+        total_pages: number; 
+        total_count: number; 
+        limit: number 
+      } 
+    }>('/admin/comments/list', {
+      params: { page, limit, ...(status && { status }) },
+    }),
+
+  getCommentForAdmin: (id: number) =>
+    api.get<{ comment: CommentAdmin }>(`/admin/comments/${id}`),
+
+  updateCommentStatus: (id: number, data: UpdateCommentStatusRequest) =>
+    api.put<{ message: string }>(`/admin/comments/${id}/status`, data),
+
+  deleteComment: (id: number) =>
+    api.delete<{ message: string }>(`/admin/comments/${id}`),
+
+  getCommentStats: () =>
+    api.get<{ stats: CommentStats }>('/admin/comments/stats'),
 }

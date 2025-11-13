@@ -72,6 +72,12 @@ func (h *AuthHandler) Login(c *gin.Context) {
 // AuthMiddleware validates JWT tokens for protected routes
 func (h *AuthHandler) AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Allow preflight OPTIONS requests to pass through
+		if c.Request.Method == "OPTIONS" {
+			c.Next()
+			return
+		}
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})

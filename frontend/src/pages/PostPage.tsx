@@ -4,11 +4,18 @@ import {
   Typography,
   CircularProgress,
   Link,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Snackbar,
+  Alert,
+  Divider,
 } from '@mui/material'
-import { ArrowBack, CalendarToday, AccessTime, Visibility } from '@mui/icons-material'
+import { ArrowBack, CalendarToday, AccessTime, Visibility, Send, Comment as CommentIcon } from '@mui/icons-material'
 import { useParams, useNavigate } from 'react-router-dom'
-import { postsAPI } from '../services/api'
-import type { BlogPost } from '../services/api'
+import { postsAPI, commentsAPI } from '../services/api'
+import type { BlogPost, Comment, CreateCommentRequest } from '../services/api'
 import TagList from '../components/TagList'
 import MDEditor from '@uiw/react-md-editor'
 import '@uiw/react-md-editor/markdown-editor.css'
@@ -21,8 +28,36 @@ const PostPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>('')
   
+  // Comments state
+  const [comments, setComments] = useState<Comment[]>([])
+  const [commentsLoading, setCommentsLoading] = useState(false)
+  const [commentForm, setCommentForm] = useState({
+    name: '',
+    email: '',
+    content: ''
+  })
+  const [commentSubmitting, setCommentSubmitting] = useState(false)
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error'
+  })
+  
   // Use dynamic title - will update when post is loaded
   useDocumentTitle(post?.title)
+
+  // Fetch comments for a post
+  const fetchComments = async (postId: number) => {
+    try {
+      setCommentsLoading(true)
+      const response = await commentsAPI.getCommentsByPostId(postId)
+      setComments(response.data.comments)
+    } catch (err) {
+      console.error('Error fetching comments:', err)
+    } finally {
+      setCommentsLoading(false)
+    }
+  }
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -32,6 +67,8 @@ const PostPage: React.FC = () => {
         setLoading(true)
         const response = await postsAPI.getPublicPost(slug)
         setPost(response.data)
+        // Fetch comments after post is loaded
+        await fetchComments(response.data.id)
       } catch (err: any) {
         if (err.response?.status === 404) {
           setError('Blog post not found')
@@ -46,6 +83,57 @@ const PostPage: React.FC = () => {
 
     fetchPost()
   }, [slug])
+
+  // Handle comment form submission
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    if (!post || !commentForm.name.trim() || !commentForm.content.trim()) {
+      setSnackbar({
+        open: true,
+        message: 'Please fill in all required fields',
+        severity: 'error'
+      })
+      return
+    }
+
+    try {
+      setCommentSubmitting(true)
+      const commentData: CreateCommentRequest = {
+        post_id: post.id,
+        name: commentForm.name.trim(),
+        email: commentForm.email.trim() || undefined,
+        content: commentForm.content.trim()
+      }
+
+      await commentsAPI.createComment(commentData)
+      
+      setSnackbar({
+        open: true,
+        message: 'Comment submitted successfully and is pending moderation',
+        severity: 'success'
+      })
+      
+      // Reset form
+      setCommentForm({ name: '', email: '', content: '' })
+      
+      // Refresh comments (though new comment won't show until approved)
+      await fetchComments(post.id)
+    } catch (err) {
+      console.error('Error submitting comment:', err)
+      setSnackbar({
+        open: true,
+        message: 'Failed to submit comment. Please try again.',
+        severity: 'error'
+      })
+    } finally {
+      setCommentSubmitting(false)
+    }
+  }
+
+  const handleSnackbarClose = () => {
+    setSnackbar({ ...snackbar, open: false })
+  }
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -243,6 +331,117 @@ const PostPage: React.FC = () => {
           data-color-mode="light"
         />
       </Box>
+
+      {/* Comments Section */}
+      <Box sx={{ mt: 6 }}>
+        <Divider sx={{ mb: 4 }} />
+        
+        {/* Comments Header */}
+        <Box display="flex" alignItems="center" sx={{ mb: 3 }}>
+          <CommentIcon sx={{ mr: 1 }} />
+          <Typography variant="h5" component="h2">
+            Comments ({comments.length})
+          </Typography>
+        </Box>
+
+        {/* Existing Comments */}
+        {commentsLoading ? (
+          <Box display="flex" justifyContent="center" my={4}>
+            <CircularProgress />
+          </Box>
+        ) : comments.length > 0 ? (
+          <Box sx={{ mb: 4 }}>
+            {comments.map((comment) => (
+              <Card key={comment.id} sx={{ mb: 2 }}>
+                <CardContent>
+                  <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {comment.name}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {formatDate(comment.created_at)}
+                    </Typography>
+                  </Box>
+                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                    {comment.content}
+                  </Typography>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        ) : (
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+            No comments yet. Be the first to leave a comment!
+          </Typography>
+        )}
+
+        {/* Comment Form */}
+        <Card>
+          <CardContent>
+            <Typography variant="h6" sx={{ mb: 3 }}>
+              Leave a Comment
+            </Typography>
+            <Box component="form" onSubmit={handleCommentSubmit}>
+              <Box sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Name *"
+                  value={commentForm.name}
+                  onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
+                  required
+                  disabled={commentSubmitting}
+                />
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label="Email (optional)"
+                  type="email"
+                  value={commentForm.email}
+                  onChange={(e) => setCommentForm({ ...commentForm, email: e.target.value })}
+                  disabled={commentSubmitting}
+                />
+              </Box>
+              <Box sx={{ mb: 3 }}>
+                <TextField
+                  fullWidth
+                  label="Comment *"
+                  multiline
+                  rows={4}
+                  value={commentForm.content}
+                  onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })}
+                  required
+                  disabled={commentSubmitting}
+                  placeholder="Write your comment here..."
+                />
+              </Box>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={commentSubmitting || !commentForm.name.trim() || !commentForm.content.trim()}
+                startIcon={<Send />}
+              >
+                {commentSubmitting ? 'Submitting...' : 'Submit Comment'}
+              </Button>
+              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+                Comments are moderated and will be approved before appearing on the site.
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   )
 }

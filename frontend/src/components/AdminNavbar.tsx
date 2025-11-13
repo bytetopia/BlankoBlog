@@ -11,6 +11,7 @@ import {
   Dashboard, 
   Article, 
   LocalOffer, 
+  Comment,
   Settings,
   Home,
 } from '@mui/icons-material'
@@ -40,6 +41,11 @@ const AdminNavbar: React.FC = () => {
       label: 'Tags',
       path: '/admin/tags',
       icon: <LocalOffer />,
+    },
+    {
+      label: 'Comments',
+      path: '/admin/comments',
+      icon: <Comment />,
     },
     {
       label: 'Settings',

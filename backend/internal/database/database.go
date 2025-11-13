@@ -69,6 +69,7 @@ func runMigrations(db *gorm.DB) error {
 		&models.Post{},
 		&models.Config{},
 		&models.Tag{},
+		&models.Comment{},
 	)
 }
 

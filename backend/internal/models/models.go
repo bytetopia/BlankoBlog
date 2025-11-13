@@ -54,6 +54,22 @@ type Config struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
+// Comment represents a comment on a blog post
+type Comment struct {
+	ID        uint           `json:"id" gorm:"primarykey"`
+	PostID    uint           `json:"post_id" gorm:"not null"`
+	Post      Post           `json:"post,omitempty" gorm:"foreignKey:PostID"`
+	Name      string         `json:"name" gorm:"not null" validate:"required,min=1,max=100"`
+	Email     string         `json:"email" gorm:"size:255" validate:"omitempty,email,max=255"`
+	Content   string         `json:"content" gorm:"not null" validate:"required,min=1,max=2000"`
+	Status    string         `json:"status" gorm:"not null;default:'pending'" validate:"required,oneof=pending approved hidden"`
+	IPAddress string         `json:"ip_address" gorm:"size:45"`     // IPv4/IPv6 address
+	Referer   string         `json:"referer" gorm:"size:500"`       // HTTP Referer header
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+}
+
 // PostResponse represents the public response format for a post
 type PostResponse struct {
 	ID        uint      `json:"id"`
@@ -141,6 +157,80 @@ type TagWithPostCount struct {
 	PostCount int64     `json:"post_count"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// CreateCommentRequest represents the request to create a new comment
+type CreateCommentRequest struct {
+	PostID  uint   `json:"post_id" validate:"required"`
+	Name    string `json:"name" validate:"required,min=1,max=100"`
+	Email   string `json:"email" validate:"omitempty,email,max=255"`
+	Content string `json:"content" validate:"required,min=1,max=2000"`
+}
+
+// CommentResponse represents the public response format for a comment
+type CommentResponse struct {
+	ID        uint      `json:"id"`
+	PostID    uint      `json:"post_id"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email,omitempty"` // Only show email to admin
+	Content   string    `json:"content"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+// CommentAdminResponse represents the admin response format for a comment
+type CommentAdminResponse struct {
+	ID        uint      `json:"id"`
+	PostID    uint      `json:"post_id"`
+	PostTitle string    `json:"post_title,omitempty"`
+	Name      string    `json:"name"`
+	Email     string    `json:"email"`
+	Content   string    `json:"content"`
+	Status    string    `json:"status"`
+	IPAddress string    `json:"ip_address"`
+	Referer   string    `json:"referer"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// UpdateCommentStatusRequest represents the request to update comment status
+type UpdateCommentStatusRequest struct {
+	Status string `json:"status" validate:"required,oneof=pending approved hidden"`
+}
+
+// ToResponse converts a Comment to CommentResponse (public view)
+func (c *Comment) ToResponse() CommentResponse {
+	return CommentResponse{
+		ID:        c.ID,
+		PostID:    c.PostID,
+		Name:      c.Name,
+		Content:   c.Content,
+		Status:    c.Status,
+		CreatedAt: c.CreatedAt,
+	}
+}
+
+// ToAdminResponse converts a Comment to CommentAdminResponse (admin view)
+func (c *Comment) ToAdminResponse() CommentAdminResponse {
+	response := CommentAdminResponse{
+		ID:        c.ID,
+		PostID:    c.PostID,
+		Name:      c.Name,
+		Email:     c.Email,
+		Content:   c.Content,
+		Status:    c.Status,
+		IPAddress: c.IPAddress,
+		Referer:   c.Referer,
+		CreatedAt: c.CreatedAt,
+		UpdatedAt: c.UpdatedAt,
+	}
+	
+	// Include post title if available
+	if c.Post.ID != 0 {
+		response.PostTitle = c.Post.Title
+	}
+	
+	return response
 }
 
 // ToResponse converts a Post to PostResponse

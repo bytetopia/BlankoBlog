@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
 import AdminPostsPage from '../pages/admin/AdminPostsPage'
 import AdminTagsPage from '../pages/admin/AdminTagsPage'
+import AdminCommentsPage from '../pages/admin/AdminCommentsPage'
 import AdminSettingsPage from '../pages/admin/AdminSettingsPage'
 import AdminPostEditorPage from '../pages/admin/AdminPostEditorPage'
 
@@ -15,6 +16,8 @@ function AdminRoutes() {
       <Route path="/admin/posts/new" element={<AdminPostEditorPage />} />
       <Route path="/admin/posts/:id" element={<AdminPostEditorPage />} />
       <Route path="/admin/tags" element={<AdminTagsPage />} />
+      <Route path="/admin/comments" element={<AdminCommentsPage />} />
+      <Route path="/admin/settings" element={<AdminSettingsPage />} />
       <Route path="/admin/settings" element={<AdminSettingsPage />} />
     </Routes>
   )
