@@ -4,15 +4,12 @@ import {
   Typography,
   CircularProgress,
   Link,
-  Card,
-  CardContent,
   TextField,
   Button,
   Snackbar,
   Alert,
-  Divider,
 } from '@mui/material'
-import { ArrowBack, CalendarToday, AccessTime, Visibility, Send, Comment as CommentIcon } from '@mui/icons-material'
+import { ArrowBack, Send } from '@mui/icons-material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { postsAPI, commentsAPI } from '../services/api'
 import type { BlogPost, Comment, CreateCommentRequest } from '../services/api'
@@ -182,7 +179,7 @@ const PostPage: React.FC = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, mt: 4 }}>
+    <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, mt: 4, px: 2 }}>
       {/* Back to Home Link */}
       <Link
         onClick={() => navigate('/')}
@@ -207,10 +204,11 @@ const PostPage: React.FC = () => {
         variant="h2" 
         component="h1" 
         sx={{ 
-          fontSize: { xs: '2rem', md: '2.5rem' },
-          fontWeight: 'bold',
-          mb: 3,
-          color: 'text.primary'
+          fontSize: { xs: '2rem', md: '3rem' },
+          fontWeight: 'normal',
+          mb: 2,
+          color: 'text.primary',
+          lineHeight: 1.2,
         }}
       >
         {post.title}
@@ -219,51 +217,42 @@ const PostPage: React.FC = () => {
       {/* Post Summary */}
       {post.summary && (
         <Typography
-          variant="h6"
+          variant="body1"
           color="text.secondary"
           sx={{ 
-            fontStyle: 'italic', 
             mb: 3,
-            fontWeight: 'normal'
+            fontSize: '1.1rem',
+            lineHeight: 1.6,
           }}
         >
           {post.summary}
         </Typography>
       )}
 
-      {/* Post Dates */}
-      <Box sx={{ mb: 3 }}>
-        <Box display="flex" alignItems="center" sx={{ mb: 1 }}>
-          <CalendarToday fontSize="small" color="action" />
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-            Published: {formatDate(post.created_at)}
-          </Typography>
-        </Box>
+      {/* Post Metadata */}
+      <Box sx={{ mb: 4, display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+        <Typography variant="body2" color="text.secondary">
+          {formatDate(post.created_at)}
+        </Typography>
         
         {post.updated_at !== post.created_at && (
-          <Box display="flex" alignItems="center">
-            <AccessTime fontSize="small" color="action" />
-            <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-              Updated: {formatDate(post.updated_at)}
+          <>
+            <Typography variant="body2" color="text.secondary">•</Typography>
+            <Typography variant="body2" color="text.secondary">
+              Updated {formatDate(post.updated_at)}
             </Typography>
-          </Box>
+          </>
         )}
 
-        {/* View Count */}
-        <Box display="flex" alignItems="center">
-          <Visibility fontSize="small" color="action" />
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-            Views: {post.view_count.toLocaleString()}
-          </Typography>
-        </Box>
+        <Typography variant="body2" color="text.secondary">•</Typography>
+        <Typography variant="body2" color="text.secondary">
+          {post.view_count.toLocaleString()} views
+        </Typography>
       </Box>
 
       {/* Tags */}
       {post.tags && post.tags.length > 0 && (
         <Box sx={{ mb: 4 }}>
-          <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            Tags:
-          </Typography>
           <TagList tags={post.tags} />
         </Box>
       )}
@@ -271,6 +260,7 @@ const PostPage: React.FC = () => {
       {/* Post Content */}
       <Box
         sx={(theme) => ({
+          mb: 6,
           '& .w-md-editor': {
             backgroundColor: 'transparent',
           },
@@ -281,62 +271,83 @@ const PostPage: React.FC = () => {
           },
           '& .wmde-markdown': {
             backgroundColor: 'transparent',
-            fontSize: '1.1rem',
-            lineHeight: 1.8,
-            color: 'inherit',
+            fontSize: '1rem',
+            lineHeight: 1.7,
+            color: theme.palette.text.primary,
             fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown h1, & .wmde-markdown h2, & .wmde-markdown h3, & .wmde-markdown h4, & .wmde-markdown h5, & .wmde-markdown h6': {
             marginTop: '2rem',
             marginBottom: '1rem',
             fontFamily: theme.typography.fontFamily,
+            fontWeight: 600,
+            color: theme.palette.text.primary,
           },
           '& .wmde-markdown h1': {
             fontSize: '2rem',
           },
           '& .wmde-markdown h2': {
-            fontSize: '1.75rem',
-          },
-          '& .wmde-markdown h3': {
             fontSize: '1.5rem',
           },
+          '& .wmde-markdown h3': {
+            fontSize: '1.25rem',
+          },
           '& .wmde-markdown p': {
-            marginBottom: '1.2rem',
+            marginBottom: '1rem',
             fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown ul, & .wmde-markdown ol': {
-            marginBottom: '1.2rem',
-            paddingLeft: '2rem',
+            marginBottom: '1rem',
+            paddingLeft: '1.5rem',
             fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown li': {
+            marginBottom: '0.5rem',
             fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown blockquote': {
-            borderLeft: '4px solid #ddd',
+            borderLeft: `4px solid ${theme.palette.divider}`,
             paddingLeft: '1rem',
             marginLeft: 0,
-            fontStyle: 'italic',
-            color: '#666',
+            marginBottom: '1rem',
+            color: theme.palette.text.secondary,
             fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown pre': {
-            backgroundColor: '#f5f5f5',
+            backgroundColor: theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
             padding: '1rem',
             borderRadius: '4px',
             overflow: 'auto',
+            marginBottom: '1rem',
           },
           '& .wmde-markdown code': {
-            backgroundColor: '#f5f5f5',
+            backgroundColor: theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
             padding: '0.2rem 0.4rem',
             borderRadius: '3px',
             fontSize: '0.9em',
           },
           '& .wmde-markdown a': {
+            color: theme.palette.primary.main,
+            textDecoration: 'none',
+            '&:hover': {
+              textDecoration: 'underline',
+            },
             fontFamily: theme.typography.fontFamily,
+          },
+          '& .wmde-markdown img': {
+            maxWidth: '100%',
+            height: 'auto',
+            borderRadius: '4px',
           },
           '& .wmde-markdown table': {
             fontFamily: theme.typography.fontFamily,
+            borderCollapse: 'collapse',
+            width: '100%',
+            marginBottom: '1rem',
+          },
+          '& .wmde-markdown th, & .wmde-markdown td': {
+            border: `1px solid ${theme.palette.divider}`,
+            padding: '0.5rem',
           },
         })}
       >
@@ -347,16 +358,11 @@ const PostPage: React.FC = () => {
       </Box>
 
       {/* Comments Section */}
-      <Box sx={{ mt: 6 }}>
-        <Divider sx={{ mb: 4 }} />
-        
+      <Box sx={{ mt: 8, pt: 4, borderTop: 1, borderColor: 'divider' }}>
         {/* Comments Header */}
-        <Box display="flex" alignItems="center" sx={{ mb: 3 }}>
-          <CommentIcon sx={{ mr: 1 }} />
-          <Typography variant="h5" component="h2">
-            Comments ({comments.length})
-          </Typography>
-        </Box>
+        <Typography variant="h5" component="h2" sx={{ mb: 3, fontWeight: 'normal' }}>
+          Comments ({comments.length})
+        </Typography>
 
         {/* Existing Comments */}
         {commentsLoading ? (
@@ -366,21 +372,30 @@ const PostPage: React.FC = () => {
         ) : comments.length > 0 ? (
           <Box sx={{ mb: 4 }}>
             {comments.map((comment) => (
-              <Card key={comment.id} sx={{ mb: 2 }}>
-                <CardContent>
-                  <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {comment.name}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {formatDate(comment.created_at)}
-                    </Typography>
-                  </Box>
-                  <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                    {comment.content}
+              <Box 
+                key={comment.id} 
+                sx={{ 
+                  mb: 3,
+                  pb: 3,
+                  borderBottom: 1,
+                  borderColor: 'divider',
+                  '&:last-child': {
+                    borderBottom: 0,
+                  }
+                }}
+              >
+                <Box display="flex" justifyContent="space-between" alignItems="baseline" sx={{ mb: 1 }}>
+                  <Typography variant="subtitle1" fontWeight="medium" color="text.primary">
+                    {comment.name}
                   </Typography>
-                </CardContent>
-              </Card>
+                  <Typography variant="caption" color="text.secondary">
+                    {formatDate(comment.created_at)}
+                  </Typography>
+                </Box>
+                <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', color: 'text.primary' }}>
+                  {comment.content}
+                </Typography>
+              </Box>
             ))}
           </Box>
         ) : (
@@ -390,59 +405,60 @@ const PostPage: React.FC = () => {
         )}
 
         {/* Comment Form */}
-        <Card>
-          <CardContent>
-            <Typography variant="h6" sx={{ mb: 3 }}>
-              Leave a Comment
-            </Typography>
-            <Box component="form" onSubmit={handleCommentSubmit}>
-              <Box sx={{ mb: 2 }}>
-                <TextField
-                  fullWidth
-                  label="Name *"
-                  value={commentForm.name}
-                  onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
-                  required
-                  disabled={commentSubmitting}
-                />
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <TextField
-                  fullWidth
-                  label="Email (optional)"
-                  type="email"
-                  value={commentForm.email}
-                  onChange={(e) => setCommentForm({ ...commentForm, email: e.target.value })}
-                  disabled={commentSubmitting}
-                />
-              </Box>
-              <Box sx={{ mb: 3 }}>
-                <TextField
-                  fullWidth
-                  label="Comment *"
-                  multiline
-                  rows={4}
-                  value={commentForm.content}
-                  onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })}
-                  required
-                  disabled={commentSubmitting}
-                  placeholder="Write your comment here..."
-                />
-              </Box>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={commentSubmitting || !commentForm.name.trim() || !commentForm.content.trim()}
-                startIcon={<Send />}
-              >
-                {commentSubmitting ? 'Submitting...' : 'Submit Comment'}
-              </Button>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                Comments are moderated and will be approved before appearing on the site.
-              </Typography>
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h6" sx={{ mb: 3, fontWeight: 'normal' }}>
+            Leave a Comment
+          </Typography>
+          <Box component="form" onSubmit={handleCommentSubmit}>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                label="Name"
+                value={commentForm.name}
+                onChange={(e) => setCommentForm({ ...commentForm, name: e.target.value })}
+                required
+                disabled={commentSubmitting}
+                size="small"
+              />
             </Box>
-          </CardContent>
-        </Card>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                label="Email (optional)"
+                type="email"
+                value={commentForm.email}
+                onChange={(e) => setCommentForm({ ...commentForm, email: e.target.value })}
+                disabled={commentSubmitting}
+                size="small"
+              />
+            </Box>
+            <Box sx={{ mb: 2 }}>
+              <TextField
+                fullWidth
+                label="Comment"
+                multiline
+                rows={4}
+                value={commentForm.content}
+                onChange={(e) => setCommentForm({ ...commentForm, content: e.target.value })}
+                required
+                disabled={commentSubmitting}
+                placeholder="Write your comment here..."
+              />
+            </Box>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={commentSubmitting || !commentForm.name.trim() || !commentForm.content.trim()}
+              startIcon={<Send />}
+              sx={{ mb: 1 }}
+            >
+              {commentSubmitting ? 'Submitting...' : 'Submit Comment'}
+            </Button>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+              Comments are moderated and will be approved before appearing.
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
       {/* Snackbar for notifications */}

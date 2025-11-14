@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react'
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
-  CardActionArea,
+  List,
+  ListItem,
+  ListItemButton,
   CircularProgress,
-  Chip,
   Link,
 } from '@mui/material'
-import { ArrowBack, LocalOffer } from '@mui/icons-material'
+import { ArrowBack } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { tagsAPI } from '../services/api'
 import type { TagWithPostCount } from '../services/api'
@@ -108,28 +107,18 @@ const TagsPage: React.FC = () => {
         variant="h2" 
         component="h1" 
         sx={{ 
-          fontSize: { xs: '2.5rem', md: '3rem' },
-          fontWeight: 'bold',
-          mb: 2,
+          fontSize: { xs: '2rem', md: '3rem' },
+          fontWeight: 'normal',
+          textAlign: 'left',
+          mb: 4,
+          ml: 3, // Align with list items
           color: 'primary.main',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2
         }}
       >
-        <LocalOffer sx={{ fontSize: 'inherit' }} />
         Tags
       </Typography>
 
-      <Typography 
-        variant="body1" 
-        color="text.secondary" 
-        sx={{ mb: 4 }}
-      >
-        Explore all topics and discover posts by category
-      </Typography>
-
-      {/* Tags Grid */}
+      {/* Tags List */}
       {tags.length === 0 ? (
         <Box textAlign="center" mt={4}>
           <Typography variant="h6" color="text.secondary">
@@ -137,74 +126,54 @@ const TagsPage: React.FC = () => {
           </Typography>
         </Box>
       ) : (
-        <Box sx={{ display: 'grid', gap: 3, gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))' }}>
+        <List sx={{ p: 0 }}>
           {tags.map((tag) => (
-            <Card 
-              key={tag.id}
-              sx={{ 
-                height: '100%',
-                transition: 'all 0.3s ease',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: (theme) => theme.shadows[8],
-                }
-              }}
+            <ListItem 
+              key={tag.id} 
+              sx={{ px: 0 }}
             >
-              <CardActionArea 
+              <ListItemButton
                 onClick={() => handleTagClick(tag)}
-                sx={{ height: '100%', p: 0 }}
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  py: 1.5,
+                  px: 2,
+                  borderRadius: 2,
+                  mx: 1,
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  }
+                }}
               >
-                <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  {/* Tag Chip */}
-                  <Box sx={{ mb: 2 }}>
-                    <Chip
-                      label={tag.name}
-                      sx={{
-                        backgroundColor: tag.color || '#1976d2',
-                        color: '#ffffff',
-                        fontWeight: 600,
-                        fontSize: '0.9rem',
-                        '& .MuiChip-label': {
-                          color: '#ffffff',
-                        },
-                      }}
-                    />
-                  </Box>
-
-                  {/* Post Count */}
-                  <Typography 
-                    variant="h4" 
-                    component="div"
-                    sx={{ 
-                      fontWeight: 'bold',
-                      mb: 1,
-                      color: 'primary.main'
-                    }}
-                  >
-                    {tag.post_count}
-                  </Typography>
-
-                  <Typography 
-                    variant="body2" 
-                    color="text.secondary"
-                    sx={{ mb: 2 }}
-                  >
-                    {tag.post_count === 1 ? 'post' : 'posts'}
-                  </Typography>
-
-                  {/* Created Date */}
-                  <Typography 
-                    variant="caption" 
-                    color="text.disabled"
-                    sx={{ mt: 'auto' }}
-                  >
-                    Created {new Date(tag.created_at).toLocaleDateString()}
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
+                <Typography 
+                  variant="h6" 
+                  component="h2"
+                  sx={{ 
+                    fontWeight: 'medium',
+                    color: 'text.primary',
+                    textAlign: 'left',
+                    flex: 1
+                  }}
+                >
+                  {tag.name}
+                </Typography>
+                <Typography 
+                  variant="body2" 
+                  color="text.secondary"
+                  sx={{ 
+                    textAlign: 'right',
+                    minWidth: 'fit-content',
+                    ml: 2
+                  }}
+                >
+                  {tag.post_count}
+                </Typography>
+              </ListItemButton>
+            </ListItem>
           ))}
-        </Box>
+        </List>
       )}
     </Box>
   )

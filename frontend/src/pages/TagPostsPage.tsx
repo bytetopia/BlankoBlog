@@ -8,10 +8,8 @@ import {
   Pagination,
   CircularProgress,
   Link,
-  Chip,
-  Breadcrumbs,
 } from '@mui/material'
-import { ArrowBack, LocalOffer, Home } from '@mui/icons-material'
+import { ArrowBack } from '@mui/icons-material'
 import { useParams, useNavigate } from 'react-router-dom'
 import { tagsAPI } from '../services/api'
 import type { BlogPost, PaginatedPostsResponse, Tag } from '../services/api'
@@ -124,79 +122,48 @@ const TagPostsPage: React.FC = () => {
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', py: 6, mt: 4 }}>
-      {/* Breadcrumbs */}
-      <Breadcrumbs sx={{ mb: 3 }} separator="›">
-        <Link
-          onClick={() => navigate('/')}
-          sx={{ 
-            display: 'flex',
-            alignItems: 'center',
-            color: 'primary.main',
-            textDecoration: 'none',
-            cursor: 'pointer',
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}
-        >
-          <Home sx={{ mr: 0.5 }} fontSize="small" />
-          Home
-        </Link>
-        <Link
-          onClick={() => navigate('/tags')}
-          sx={{ 
-            display: 'flex',
-            alignItems: 'center',
-            color: 'primary.main',
-            textDecoration: 'none',
-            cursor: 'pointer',
-            '&:hover': {
-              textDecoration: 'underline'
-            }
-          }}
-        >
-          <LocalOffer sx={{ mr: 0.5 }} fontSize="small" />
-          Tags
-        </Link>
-        <Typography color="text.primary" sx={{ display: 'flex', alignItems: 'center' }}>
-          {tag.name}
-        </Typography>
-      </Breadcrumbs>
+      {/* Back to Tags Link */}
+      <Link
+        onClick={() => navigate('/tags')}
+        sx={{ 
+          display: 'flex',
+          alignItems: 'center',
+          mb: 3,
+          color: 'primary.main',
+          textDecoration: 'none',
+          cursor: 'pointer',
+          '&:hover': {
+            textDecoration: 'underline'
+          }
+        }}
+      >
+        <ArrowBack sx={{ mr: 1 }} fontSize="small" />
+        Back to Tags
+      </Link>
 
-      {/* Tag Header */}
-      <Box sx={{ mb: 4 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Chip
-            label={tag.name}
-            sx={{
-              backgroundColor: tag.color || '#1976d2',
-              color: '#ffffff',
-              fontWeight: 600,
-              fontSize: '1.1rem',
-              height: 40,
-              '& .MuiChip-label': {
-                color: '#ffffff',
-                px: 2,
-              },
-            }}
-          />
-          <Typography 
-            variant="h3" 
-            component="h1" 
-            sx={{ 
-              fontSize: { xs: '2rem', md: '2.5rem' },
-              fontWeight: 'bold',
-              color: 'text.primary'
-            }}
-          >
-            Posts
-          </Typography>
-        </Box>
-        
-        <Typography variant="body1" color="text.secondary">
-          {pagination.total} {pagination.total === 1 ? 'post' : 'posts'} tagged with "{tag.name}"
-        </Typography>
-      </Box>
+      {/* Page Title */}
+      <Typography 
+        variant="h2" 
+        component="h1" 
+        sx={{ 
+          fontSize: { xs: '2rem', md: '3rem' },
+          fontWeight: 'normal',
+          textAlign: 'left',
+          mb: 1,
+          ml: 3, // Align with post list text
+          color: 'primary.main'
+        }}
+      >
+        {tag.name}
+      </Typography>
+
+      <Typography 
+        variant="body1" 
+        color="text.secondary"
+        sx={{ mb: 4, ml: 3 }}
+      >
+        {pagination.total} {pagination.total === 1 ? 'post' : 'posts'}
+      </Typography>
 
       {/* Posts List */}
       {posts.length === 0 ? (

@@ -9,7 +9,6 @@ import {
   CircularProgress,
   Link,
 } from '@mui/material'
-import { LocalOffer, RssFeed } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { postsAPI } from '../services/api'
 import type { BlogPost, PaginatedPostsResponse } from '../services/api'
@@ -95,8 +94,8 @@ const HomePage: React.FC = () => {
         variant="h2" 
         component="h1" 
         sx={{ 
-          fontSize: { xs: '2.5rem', md: '3.5rem' },
-          fontWeight: 'bold',
+          fontSize: { xs: '2rem', md: '3rem' },
+          fontWeight: 'normal',
           textAlign: 'left',
           mb: 4,
           ml: 3, // Align with post list text (mx: 1 + px: 2 = 3)
@@ -188,7 +187,7 @@ const HomePage: React.FC = () => {
           pt: 4, 
           borderTop: 1, 
           borderColor: 'divider',
-          textAlign: 'left'
+          ml: 3, // Align with title and post list
         }}
       >
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 3, flexWrap: 'wrap' }}>
@@ -197,7 +196,7 @@ const HomePage: React.FC = () => {
             sx={{
               display: 'inline-flex',
               alignItems: 'center',
-              color: 'primary.main',
+              color: 'text.secondary',
               textDecoration: 'none',
               fontSize: '1.1rem',
               fontWeight: 500,
@@ -207,8 +206,7 @@ const HomePage: React.FC = () => {
               }
             }}
           >
-            <LocalOffer sx={{ mr: 1 }} fontSize="small" />
-            Browse All Tags
+            / Tags
           </Link>
           
           <Link
@@ -218,7 +216,7 @@ const HomePage: React.FC = () => {
             sx={{
               display: 'inline-flex',
               alignItems: 'center',
-              color: 'primary.main',
+              color: 'text.secondary',
               textDecoration: 'none',
               fontSize: '1.1rem',
               fontWeight: 500,
@@ -227,8 +225,26 @@ const HomePage: React.FC = () => {
               }
             }}
           >
-            <RssFeed sx={{ mr: 1 }} fontSize="small" />
-            RSS Feed
+            / RSS
+          </Link>
+
+          <Link
+            href="/posts/about"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              color: 'text.secondary',
+              textDecoration: 'none',
+              fontSize: '1.1rem',
+              fontWeight: 500,
+              '&:hover': {
+                textDecoration: 'underline',
+              }
+            }}
+          >
+            / About
           </Link>
         </Box>
       </Box>

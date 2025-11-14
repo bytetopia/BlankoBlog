@@ -67,7 +67,7 @@ export const theme = createTheme({
 })
 
 // Load Google Font dynamically
-export const loadGoogleFont = (fontUrl: string): void => {
+const loadGoogleFont = (fontUrl: string): void => {
   if (!fontUrl) return
 
   // Check if the link already exists
@@ -80,8 +80,8 @@ export const loadGoogleFont = (fontUrl: string): void => {
   document.head.appendChild(link)
 }
 
-// Create a dynamic theme with custom font family
-export const createCustomTheme = (fontFamily?: string, fontUrl?: string): Theme => {
+// Create a visitor theme with custom font family (minimalist black and gray theme)
+export const createVisitorTheme = (fontFamily?: string, fontUrl?: string): Theme => {
   // Load web font if URL is provided
   if (fontUrl) {
     loadGoogleFont(fontUrl)
@@ -95,60 +95,98 @@ export const createCustomTheme = (fontFamily?: string, fontUrl?: string): Theme 
     palette: {
       mode: 'light',
       primary: {
-        main: '#1976d2',
-        light: '#42a5f5',
-        dark: '#1565c0',
+        main: '#222222',      // Dark gray for primary text
+        light: '#555555',     // Medium gray for hover states
+        dark: '#000000',      // Pure black
       },
       secondary: {
-        main: '#dc004e',
+        main: '#666666',      // Light gray for secondary elements
+        light: '#999999',     // Lighter gray
+        dark: '#444444',      // Darker gray
+      },
+      text: {
+        primary: '#222222',   // Dark gray for primary text
+        secondary: '#666666', // Medium gray for secondary text
       },
       background: {
         default: '#ffffff',
         paper: '#ffffff',
       },
+      action: {
+        hover: '#f5f5f5',     // Very light gray for hover
+        selected: '#eeeeee',  // Light gray for selected
+      },
+      divider: '#e0e0e0',     // Light gray for dividers
     },
     typography: {
       fontFamily: customFontFamily,
       h1: {
         fontSize: '2.5rem',
-        fontWeight: 500,
+        fontWeight: 700,
         lineHeight: 1.2,
+        color: '#222222',
       },
       h2: {
         fontSize: '2rem',
-        fontWeight: 500,
+        fontWeight: 700,
         lineHeight: 1.3,
+        color: '#222222',
       },
       h3: {
         fontSize: '1.5rem',
-        fontWeight: 500,
+        fontWeight: 600,
         lineHeight: 1.4,
+        color: '#222222',
+      },
+      h6: {
+        fontWeight: 500,
+        color: '#222222',
       },
       body1: {
         lineHeight: 1.6,
+        color: '#222222',
+      },
+      body2: {
+        color: '#666666',
       },
     },
     components: {
-      MuiAppBar: {
+      MuiLink: {
         styleOverrides: {
           root: {
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            color: '#222222',
+            '&:hover': {
+              color: '#555555',
+            },
           },
         },
       },
-      MuiCard: {
+      MuiPagination: {
         styleOverrides: {
           root: {
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            borderRadius: 8,
+            '& .MuiPaginationItem-root': {
+              color: '#222222',
+              '&:hover': {
+                backgroundColor: '#f5f5f5',
+              },
+              '&.Mui-selected': {
+                backgroundColor: '#222222',
+                color: '#ffffff',
+                '&:hover': {
+                  backgroundColor: '#444444',
+                },
+              },
+            },
           },
         },
       },
-      MuiButton: {
+      MuiIconButton: {
         styleOverrides: {
           root: {
-            textTransform: 'none',
-            borderRadius: 6,
+            color: '#222222',
+            '&:hover': {
+              backgroundColor: '#f5f5f5',
+            },
           },
         },
       },
