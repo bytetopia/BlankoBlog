@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   Button,
-  Paper,
   TextField,
   FormControlLabel,
   Switch,
@@ -12,6 +11,10 @@ import {
   AppBar,
   Toolbar,
   IconButton,
+  Divider,
+  Chip,
+  Tabs,
+  Tab,
 } from '@mui/material'
 import { ArrowBack, Save } from '@mui/icons-material'
 import { useNavigate, useParams, useLocation } from 'react-router-dom'
@@ -20,6 +23,7 @@ import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { postsAPI } from '../../services/api'
 import type { CreatePostRequest, UpdatePostRequest, Tag } from '../../services/api'
 import TagInput from '../../components/TagInput'
+import PostFileUploader from '../../components/PostFileUploader'
 import MDEditor from '@uiw/react-md-editor'
 import '@uiw/react-md-editor/markdown-editor.css'
 import AdminNavbar from '../../components/AdminNavbar'
@@ -34,6 +38,7 @@ const PostEditorPage: React.FC = () => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
+  const [rightPanelTab, setRightPanelTab] = useState(0)
   const [post, setPost] = useState({
     title: '',
     content: '',
@@ -219,139 +224,206 @@ const PostEditorPage: React.FC = () => {
       )}
 
       {/* Content */}
-      <Box sx={{ flex: 1, px: 3, py: 3, overflow: 'auto' }}>
-        {/* Show page header and save button for admin routes */}
+      <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Page header for admin routes */}
         {isAdminRoute && (
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <IconButton
-                onClick={handleBack}
+          <Box sx={{ px: 3, py: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <IconButton onClick={handleBack}>
+                  <ArrowBack />
+                </IconButton>
+                <Typography variant="h5" component="h1">
+                  {pageTitle}
+                </Typography>
+              </Box>
+              <Button
+                variant="contained"
+                startIcon={<Save />}
+                onClick={handleSave}
+                disabled={saving || !post.title.trim() || !post.content.trim()}
+                size="large"
               >
-                <ArrowBack />
-              </IconButton>
-              <Typography variant="h4" component="h1">
-                {pageTitle}
-              </Typography>
+                {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
+              </Button>
             </Box>
-            <Button
-              variant="contained"
-              startIcon={<Save />}
-              onClick={handleSave}
-              disabled={saving || !post.title.trim() || !post.content.trim()}
-              size="large"
-            >
-              {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
-            </Button>
           </Box>
         )}
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-        
-        {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            {success}
-          </Alert>
+        {/* Alerts */}
+        {(error || success) && (
+          <Box sx={{ px: 3, pt: 2 }}>
+            {error && (
+              <Alert severity="error" sx={{ mb: 1 }} onClose={() => setError('')}>
+                {error}
+              </Alert>
+            )}
+            {success && (
+              <Alert severity="success" sx={{ mb: 1 }} onClose={() => setSuccess('')}>
+                {success}
+              </Alert>
+            )}
+          </Box>
         )}
 
-        <Paper sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
-          <Box sx={{ mb: 3 }}>
-            <TextField
-              fullWidth
-              label="Post Title"
-              value={post.title}
-              onChange={(e) => handleFieldChange('title', e.target.value)}
-              placeholder="Enter your post title..."
-              variant="outlined"
-              sx={{ mb: 3 }}
-            />
-            
-            <Box sx={{ mb: 3 }}>
+        {/* Split Layout: Editor (Left) + Metadata (Right) */}
+        <Box sx={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+          {/* Left Panel - Editor (75%) */}
+          <Box sx={{ flex: '0 0 70%', display: 'flex', flexDirection: 'column', overflow: 'hidden', borderRight: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+              {/* Title */}
               <TextField
                 fullWidth
-                label="URL Slug (Optional)"
-                value={post.slug}
-                onChange={(e) => handleFieldChange('slug', e.target.value)}
-                placeholder="url-friendly-slug"
+                label="Post Title"
+                value={post.title}
+                onChange={(e) => handleFieldChange('title', e.target.value)}
+                placeholder="Enter your post title..."
                 variant="outlined"
-                helperText="This will be used in the URL. Leave empty to auto-generate from title."
-                InputProps={{
-                  endAdornment: (
+                sx={{ mb: 3 }}
+                autoFocus
+              />
+              
+              {/* Content Editor */}
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+                  Content (Markdown)
+                </Typography>
+                <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
+                  <MDEditor
+                    value={post.content}
+                    onChange={(value) => handleFieldChange('content', value || '')}
+                    preview="edit"
+                    height={600}
+                    data-color-mode="light"
+                  />
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Right Panel - Metadata (30%) */}
+          <Box sx={{ flex: '0 0 30%', display: 'flex', flexDirection: 'column', overflow: 'hidden', bgcolor: 'grey.50' }}>
+            {/* Tabs Header */}
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', bgcolor: 'background.paper' }}>
+              <Tabs 
+                value={rightPanelTab} 
+                onChange={(_, newValue) => setRightPanelTab(newValue)}
+                variant="fullWidth"
+              >
+                <Tab label="Metadata" />
+                <Tab label="Attachments" />
+              </Tabs>
+            </Box>
+
+            {/* Tab Content */}
+            <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+              {/* Metadata Tab */}
+              {rightPanelTab === 0 && (
+                <Box>
+                  {/* Publish Status */}
+                  <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                      Status
+                    </Typography>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={post.published}
+                          onChange={(e) => handleFieldChange('published', e.target.checked)}
+                          color="primary"
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="body2">
+                            {post.published ? 'Published' : 'Draft'}
+                          </Typography>
+                          <Chip 
+                            label={post.published ? 'Live' : 'Draft'} 
+                            size="small" 
+                            color={post.published ? 'success' : 'default'}
+                          />
+                        </Box>
+                      }
+                    />
+                  </Box>
+
+                  <Divider sx={{ my: 3 }} />
+
+                  {/* URL Slug */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                      URL Slug
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={post.slug}
+                      onChange={(e) => handleFieldChange('slug', e.target.value)}
+                      placeholder="auto-generated-slug"
+                      variant="outlined"
+                      helperText={post.slug ? `/posts/${post.slug}` : 'Auto-generated from title'}
+                    />
                     <Button
                       size="small"
                       onClick={handleGenerateSlug}
                       disabled={!post.title.trim()}
-                      sx={{ ml: 1, minWidth: 'auto' }}
+                      sx={{ mt: 1 }}
+                      fullWidth
+                      variant="outlined"
                     >
-                      Generate
+                      Generate from Title
                     </Button>
-                  ),
-                }}
-              />
-              {post.slug && (
-                <Typography 
-                  variant="caption" 
-                  color="textSecondary" 
-                  sx={{ display: 'block', mt: 1 }}
-                >
-                  URL will be: /posts/{post.slug}
-                </Typography>
+                  </Box>
+
+                  <Divider sx={{ my: 3 }} />
+
+                  {/* Summary */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                      Summary
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      value={post.summary}
+                      onChange={(e) => handleFieldChange('summary', e.target.value)}
+                      placeholder="Brief description for previews..."
+                      multiline
+                      rows={3}
+                      variant="outlined"
+                      helperText="Shown in post previews and search results"
+                    />
+                  </Box>
+
+                  <Divider sx={{ my: 3 }} />
+
+                  {/* Tags */}
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                      Tags
+                    </Typography>
+                    <TagInput
+                      selectedTags={post.tags}
+                      onTagsChange={(tags: Tag[]) => handleFieldChange('tags', tags)}
+                      placeholder="Search or create tags..."
+                      allowCreate={true}
+                    />
+                  </Box>
+                </Box>
+              )}
+
+              {/* Attachments Tab */}
+              {rightPanelTab === 1 && (
+                <Box>
+                  <PostFileUploader 
+                    postId={isEditing && id ? parseInt(id) : null}
+                  />
+                </Box>
               )}
             </Box>
-            
-            <TextField
-              fullWidth
-              label="Summary (Optional)"
-              value={post.summary}
-              onChange={(e) => handleFieldChange('summary', e.target.value)}
-              placeholder="Enter a brief summary of your post..."
-              multiline
-              rows={3}
-              variant="outlined"
-              sx={{ mb: 3 }}
-              helperText="This summary will be displayed in post previews and search results"
-            />
-
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 500 }}>
-                Tags
-              </Typography>
-              <TagInput
-                selectedTags={post.tags}
-                onTagsChange={(tags: Tag[]) => handleFieldChange('tags', tags)}
-                placeholder="Search or create tags..."
-                allowCreate={true}
-              />
-            </Box>
-            
-            <Box sx={{ mb: 3 }}>
-              <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 500 }}>
-                Content (Markdown)
-              </Typography>
-              <MDEditor
-                value={post.content}
-                onChange={(value) => handleFieldChange('content', value || '')}
-                preview="edit"
-                height={500}
-                data-color-mode="light"
-              />
-            </Box>
-            
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={post.published}
-                  onChange={(e) => handleFieldChange('published', e.target.checked)}
-                />
-              }
-              label="Publish immediately"
-              sx={{ mt: 1 }}
-            />
           </Box>
-        </Paper>
+        </Box>
       </Box>
     </Box>
   )
