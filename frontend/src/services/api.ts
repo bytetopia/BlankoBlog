@@ -105,6 +105,35 @@ export interface CommentStats {
   total: number
 }
 
+export interface UploadedFile {
+  id: number
+  post_id: number
+  post_title?: string
+  original_file_name: string
+  display_name: string
+  description: string
+  server_path: string
+  file_size: number
+  mime_type: string
+  created_at: string
+  updated_at: string
+}
+
+export interface UpdateFileRequest {
+  display_name?: string
+  description?: string
+}
+
+export interface PaginatedFilesResponse {
+  files: UploadedFile[]
+  pagination: {
+    page: number
+    limit: number
+    total: number
+    total_pages: number
+  }
+}
+
 export interface User {
   id: number
   username: string
@@ -276,4 +305,41 @@ export const commentsAPI = {
 
   getCommentStats: () =>
     api.get<{ stats: CommentStats }>('/admin/comments/stats'),
+}
+
+// Files API
+export const filesAPI = {
+  uploadFile: (postId: number, file: File, displayName?: string, description?: string) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('post_id', postId.toString())
+    if (displayName) {
+      formData.append('display_name', displayName)
+    }
+    if (description) {
+      formData.append('description', description)
+    }
+    return api.post<UploadedFile>('/admin/files', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+  },
+
+  getFiles: (page = 1, limit = 20) =>
+    api.get<PaginatedFilesResponse>('/admin/files', {
+      params: { page, limit },
+    }),
+
+  getFile: (id: number) =>
+    api.get<UploadedFile>(`/admin/files/${id}`),
+
+  updateFile: (id: number, data: UpdateFileRequest) =>
+    api.put<UploadedFile>(`/admin/files/${id}`, data),
+
+  deleteFile: (id: number) =>
+    api.delete<{ message: string }>(`/admin/files/${id}`),
+
+  getFileUrl: (serverPath: string) =>
+    `${API_BASE_URL}/uploads/${serverPath}`,
 }

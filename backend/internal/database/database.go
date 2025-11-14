@@ -70,6 +70,7 @@ func runMigrations(db *gorm.DB) error {
 		&models.Config{},
 		&models.Tag{},
 		&models.Comment{},
+		&models.File{},
 	)
 }
 

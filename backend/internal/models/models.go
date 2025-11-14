@@ -70,6 +70,22 @@ type Comment struct {
 	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
 }
 
+// File represents an uploaded file associated with a post
+type File struct {
+	ID               uint           `json:"id" gorm:"primarykey"`
+	PostID           uint           `json:"post_id" gorm:"not null;index"`
+	Post             Post           `json:"post,omitempty" gorm:"foreignKey:PostID"`
+	OriginalFileName string         `json:"original_file_name" gorm:"not null"`
+	DisplayName      string         `json:"display_name" gorm:"not null"`
+	Description      string         `json:"description" gorm:"size:500"`
+	ServerPath       string         `json:"server_path" gorm:"not null;uniqueIndex"`
+	FileSize         int64          `json:"file_size" gorm:"not null"`
+	MimeType         string         `json:"mime_type" gorm:"size:100"`
+	CreatedAt        time.Time      `json:"created_at"`
+	UpdatedAt        time.Time      `json:"updated_at"`
+	DeletedAt        gorm.DeletedAt `json:"-" gorm:"index"`
+}
+
 // PostResponse represents the public response format for a post
 type PostResponse struct {
 	ID        uint      `json:"id"`
@@ -247,4 +263,48 @@ func (p *Post) ToResponse() PostResponse {
 		CreatedAt: p.CreatedAt,
 		UpdatedAt: p.UpdatedAt,
 	}
+}
+
+// FileResponse represents the response format for a file
+type FileResponse struct {
+	ID               uint      `json:"id"`
+	PostID           uint      `json:"post_id"`
+	PostTitle        string    `json:"post_title,omitempty"`
+	OriginalFileName string    `json:"original_file_name"`
+	DisplayName      string    `json:"display_name"`
+	Description      string    `json:"description"`
+	ServerPath       string    `json:"server_path"`
+	FileSize         int64     `json:"file_size"`
+	MimeType         string    `json:"mime_type"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+}
+
+// UpdateFileRequest represents the request to update file metadata
+type UpdateFileRequest struct {
+	DisplayName *string `json:"display_name,omitempty" validate:"omitempty,min=1,max=255"`
+	Description *string `json:"description,omitempty" validate:"omitempty,max=500"`
+}
+
+// ToResponse converts a File to FileResponse
+func (f *File) ToResponse() FileResponse {
+	response := FileResponse{
+		ID:               f.ID,
+		PostID:           f.PostID,
+		OriginalFileName: f.OriginalFileName,
+		DisplayName:      f.DisplayName,
+		Description:      f.Description,
+		ServerPath:       f.ServerPath,
+		FileSize:         f.FileSize,
+		MimeType:         f.MimeType,
+		CreatedAt:        f.CreatedAt,
+		UpdatedAt:        f.UpdatedAt,
+	}
+	
+	// Include post title if available
+	if f.Post.ID != 0 {
+		response.PostTitle = f.Post.Title
+	}
+	
+	return response
 }

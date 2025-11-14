@@ -49,6 +49,7 @@ func main() {
 	tagHandler := handlers.NewTagHandler(tagService)
 	commentHandler := handlers.NewCommentHandler(commentService)
 	rssHandler := handlers.NewRSSHandler(rssService)
+	fileHandler := handlers.NewFileHandler(db)
 
 	// API routes
 	api := r.Group("/api")
@@ -96,6 +97,13 @@ func main() {
 			admin.PUT("/comments/:id/status", commentHandler.UpdateCommentStatus)
 			admin.DELETE("/comments/:id", commentHandler.DeleteComment)
 			
+			// File management routes (admin only)
+			admin.POST("/files", fileHandler.UploadFile)
+			admin.GET("/files", fileHandler.GetFiles)
+			admin.GET("/files/:id", fileHandler.GetFile)
+			admin.PUT("/files/:id", fileHandler.UpdateFile)
+			admin.DELETE("/files/:id", fileHandler.DeleteFile)
+			
 			// Settings routes
 			admin.PUT("/settings/config", settingsHandler.UpdateConfigs)
 			admin.PUT("/settings/password", settingsHandler.UpdatePassword)
@@ -107,6 +115,9 @@ func main() {
 	r.GET("/rss.xml", rssHandler.GetRSSFeed)
 	r.GET("/feed", rssHandler.GetRSSFeed)
 	r.GET("/feed.xml", rssHandler.GetRSSFeed)
+
+	// Serve uploaded files
+	r.GET("/uploads/*filepath", fileHandler.ServeFile)
 
 	// Serve static files (frontend)
 	r.Static("/static", "./static")

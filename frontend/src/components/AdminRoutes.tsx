@@ -5,6 +5,8 @@ import AdminTagsPage from '../pages/admin/AdminTagsPage'
 import AdminCommentsPage from '../pages/admin/AdminCommentsPage'
 import AdminSettingsPage from '../pages/admin/AdminSettingsPage'
 import AdminPostEditorPage from '../pages/admin/AdminPostEditorPage'
+import AdminFilesPage from '../pages/admin/AdminFilesPage'
+import AdminFileEditorPage from '../pages/admin/AdminFileEditorPage'
 
 // This component bundles all admin functionality into a single chunk
 // It will only be loaded when admin routes are accessed
@@ -17,7 +19,8 @@ function AdminRoutes() {
       <Route path="/admin/posts/:id" element={<AdminPostEditorPage />} />
       <Route path="/admin/tags" element={<AdminTagsPage />} />
       <Route path="/admin/comments" element={<AdminCommentsPage />} />
-      <Route path="/admin/settings" element={<AdminSettingsPage />} />
+      <Route path="/admin/files" element={<AdminFilesPage />} />
+      <Route path="/admin/files/:id" element={<AdminFileEditorPage />} />
       <Route path="/admin/settings" element={<AdminSettingsPage />} />
     </Routes>
   )

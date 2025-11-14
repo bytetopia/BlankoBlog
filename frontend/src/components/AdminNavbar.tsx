@@ -24,6 +24,7 @@ import {
   Home,
   Menu as MenuIcon,
   Close as CloseIcon,
+  AttachFile,
 } from '@mui/icons-material'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -53,6 +54,11 @@ const AdminNavbar: React.FC = () => {
       label: 'Comments',
       path: '/admin/comments',
       icon: <Comment />,
+    },
+    {
+      label: 'Files',
+      path: '/admin/files',
+      icon: <AttachFile />,
     },
     {
       label: 'Settings',
