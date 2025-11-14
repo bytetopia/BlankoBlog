@@ -15,22 +15,17 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
   CircularProgress,
   Alert,
   IconButton,
   Chip,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
 } from '@mui/material';
-import { Edit, Delete, Upload, InsertDriveFile } from '@mui/icons-material';
+import { Edit, Delete, InsertDriveFile } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDocumentTitle } from '../../hooks/useDocumentTitle';
-import { filesAPI, postsAPI } from '../../services/api';
-import type { UploadedFile, BlogPost } from '../../services/api';
+import { filesAPI } from '../../services/api';
+import type { UploadedFile } from '../../services/api';
 import AdminNavbar from '../../components/AdminNavbar';
 
 const AdminFilesPage: React.FC = () => {
@@ -39,7 +34,6 @@ const AdminFilesPage: React.FC = () => {
   useDocumentTitle('Manage Files');
   
   const [files, setFiles] = useState<UploadedFile[]>([]);
-  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -48,14 +42,6 @@ const AdminFilesPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
   const [totalFiles, setTotalFiles] = useState(0);
-  
-  // Upload modal
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [uploadFile, setUploadFile] = useState<File | null>(null);
-  const [uploadPostId, setUploadPostId] = useState<number | ''>('');
-  const [uploadDisplayName, setUploadDisplayName] = useState('');
-  const [uploadDescription, setUploadDescription] = useState('');
-  const [uploading, setUploading] = useState(false);
   
   // Delete confirmation
   const [deleteConfirmFile, setDeleteConfirmFile] = useState<UploadedFile | null>(null);
@@ -81,7 +67,6 @@ const AdminFilesPage: React.FC = () => {
 
   useEffect(() => {
     loadFiles();
-    loadPosts();
   }, [page, rowsPerPage]);
 
   const loadFiles = async () => {
@@ -97,15 +82,6 @@ const AdminFilesPage: React.FC = () => {
     }
   };
 
-  const loadPosts = async () => {
-    try {
-      const response = await postsAPI.getPosts(1, 1000, false); // Get all posts
-      setPosts(response.data.posts);
-    } catch (err) {
-      console.error('Failed to load posts:', err);
-    }
-  };
-
   const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
@@ -113,50 +89,6 @@ const AdminFilesPage: React.FC = () => {
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      setUploadFile(file);
-      // Auto-fill display name with original filename
-      if (!uploadDisplayName) {
-        setUploadDisplayName(file.name);
-      }
-    }
-  };
-
-  const handleUpload = async () => {
-    if (!uploadFile || !uploadPostId) {
-      setError('Please select a file and post');
-      return;
-    }
-
-    try {
-      setUploading(true);
-      setError('');
-      await filesAPI.uploadFile(
-        uploadPostId as number,
-        uploadFile,
-        uploadDisplayName || undefined,
-        uploadDescription || undefined
-      );
-      setSuccess('File uploaded successfully');
-      setIsUploadModalOpen(false);
-      resetUploadForm();
-      await loadFiles();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to upload file');
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const resetUploadForm = () => {
-    setUploadFile(null);
-    setUploadPostId('');
-    setUploadDisplayName('');
-    setUploadDescription('');
   };
 
   const handleDelete = async (id: number) => {
@@ -187,17 +119,10 @@ const AdminFilesPage: React.FC = () => {
     <Box>
       <AdminNavbar />
       <Box sx={{ px: 4, py: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box sx={{ mb: 4 }}>
           <Typography variant="h4" component="h1">
             Files Management
           </Typography>
-          <Button
-            variant="contained"
-            startIcon={<Upload />}
-            onClick={() => setIsUploadModalOpen(true)}
-          >
-            Upload File
-          </Button>
         </Box>
 
         {error && (
@@ -326,90 +251,6 @@ const AdminFilesPage: React.FC = () => {
             />
           </>
         )}
-
-        {/* Upload Dialog */}
-        <Dialog
-          open={isUploadModalOpen}
-          onClose={() => {
-            setIsUploadModalOpen(false);
-            resetUploadForm();
-          }}
-          maxWidth="sm"
-          fullWidth
-        >
-          <DialogTitle>Upload File</DialogTitle>
-          <DialogContent>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-              <FormControl fullWidth required>
-                <InputLabel>Associated Post</InputLabel>
-                <Select
-                  value={uploadPostId}
-                  onChange={(e) => setUploadPostId(e.target.value as number)}
-                  label="Associated Post"
-                >
-                  {posts.map((post) => (
-                    <MenuItem key={post.id} value={post.id}>
-                      {post.title}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <Button
-                variant="outlined"
-                component="label"
-                startIcon={<Upload />}
-                fullWidth
-              >
-                {uploadFile ? uploadFile.name : 'Select File'}
-                <input
-                  type="file"
-                  hidden
-                  onChange={handleFileSelect}
-                />
-              </Button>
-
-              {uploadFile && (
-                <>
-                  <TextField
-                    label="Display Name"
-                    value={uploadDisplayName}
-                    onChange={(e) => setUploadDisplayName(e.target.value)}
-                    fullWidth
-                    helperText="Optional: Custom display name for the file"
-                  />
-
-                  <TextField
-                    label="Description"
-                    value={uploadDescription}
-                    onChange={(e) => setUploadDescription(e.target.value)}
-                    multiline
-                    rows={3}
-                    fullWidth
-                    helperText="Optional: Description or notes about the file"
-                  />
-                </>
-              )}
-            </Box>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={() => {
-                setIsUploadModalOpen(false);
-                resetUploadForm();
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleUpload}
-              variant="contained"
-              disabled={!uploadFile || !uploadPostId || uploading}
-            >
-              {uploading ? <CircularProgress size={24} /> : 'Upload'}
-            </Button>
-          </DialogActions>
-        </Dialog>
 
         {/* Delete Confirmation Dialog */}
         <Dialog
