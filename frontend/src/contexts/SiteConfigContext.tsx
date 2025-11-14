@@ -4,6 +4,8 @@ import { settingsAPI } from '../services/api'
 
 interface SiteConfig {
   blogName: string
+  fontFamily: string
+  fontUrl: string
   isLoading: boolean
   error: string | null
 }
@@ -21,6 +23,8 @@ interface SiteConfigProviderProps {
 export const SiteConfigProvider: React.FC<SiteConfigProviderProps> = ({ children }) => {
   const [config, setConfig] = useState<SiteConfig>({
     blogName: 'BlankoBlog', // Default fallback
+    fontFamily: '',
+    fontUrl: '',
     isLoading: true,
     error: null,
   })
@@ -31,9 +35,13 @@ export const SiteConfigProvider: React.FC<SiteConfigProviderProps> = ({ children
       const response = await settingsAPI.getConfig()
       const configData = response.data.configs
       const blogName = configData.blog_name || 'Blanko Blog'
+      const fontFamily = configData.font_family || ''
+      const fontUrl = configData.font_url || ''
       
       setConfig({
         blogName,
+        fontFamily,
+        fontUrl,
         isLoading: false,
         error: null,
       })
@@ -41,6 +49,8 @@ export const SiteConfigProvider: React.FC<SiteConfigProviderProps> = ({ children
       console.error('Error fetching site config:', err)
       setConfig({
         blogName: 'Blanko Blog',
+        fontFamily: '',
+        fontUrl: '',
         isLoading: false,
         error: 'Failed to load site configuration',
       })

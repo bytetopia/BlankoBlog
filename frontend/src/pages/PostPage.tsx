@@ -270,7 +270,7 @@ const PostPage: React.FC = () => {
 
       {/* Post Content */}
       <Box
-        sx={{
+        sx={(theme) => ({
           '& .w-md-editor': {
             backgroundColor: 'transparent',
           },
@@ -284,10 +284,12 @@ const PostPage: React.FC = () => {
             fontSize: '1.1rem',
             lineHeight: 1.8,
             color: 'inherit',
+            fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown h1, & .wmde-markdown h2, & .wmde-markdown h3, & .wmde-markdown h4, & .wmde-markdown h5, & .wmde-markdown h6': {
             marginTop: '2rem',
             marginBottom: '1rem',
+            fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown h1': {
             fontSize: '2rem',
@@ -300,10 +302,15 @@ const PostPage: React.FC = () => {
           },
           '& .wmde-markdown p': {
             marginBottom: '1.2rem',
+            fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown ul, & .wmde-markdown ol': {
             marginBottom: '1.2rem',
             paddingLeft: '2rem',
+            fontFamily: theme.typography.fontFamily,
+          },
+          '& .wmde-markdown li': {
+            fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown blockquote': {
             borderLeft: '4px solid #ddd',
@@ -311,6 +318,7 @@ const PostPage: React.FC = () => {
             marginLeft: 0,
             fontStyle: 'italic',
             color: '#666',
+            fontFamily: theme.typography.fontFamily,
           },
           '& .wmde-markdown pre': {
             backgroundColor: '#f5f5f5',
@@ -324,7 +332,13 @@ const PostPage: React.FC = () => {
             borderRadius: '3px',
             fontSize: '0.9em',
           },
-        }}
+          '& .wmde-markdown a': {
+            fontFamily: theme.typography.fontFamily,
+          },
+          '& .wmde-markdown table': {
+            fontFamily: theme.typography.fontFamily,
+          },
+        })}
       >
         <MDEditor.Markdown
           source={post.content}

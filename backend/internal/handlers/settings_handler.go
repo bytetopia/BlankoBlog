@@ -54,9 +54,10 @@ func (h *SettingsHandler) UpdateConfigs(c *gin.Context) {
 
 	// Validate that only allowed config keys are being updated
 	allowedKeys := map[string]bool{
-		"blog_name":         true,
-		"blog_description":  true,
-		"blog_introduction": true,
+		"blog_name":        true,
+		"blog_description": true,
+		"font_family":      true,
+		"font_url":         true,
 	}
 
 	for key := range req.Configs {

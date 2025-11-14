@@ -90,10 +90,9 @@ func (s *ConfigService) GetConfig(key string) (string, error) {
 // setDefaultConfigs ensures default configurations exist
 func (s *ConfigService) setDefaultConfigs(configMap map[string]string) {
 	defaults := map[string]string{
-		"blog_name":         "Blanko Blog",
-		"blog_description":  "A simple and elegant blog platform",
-		"blog_introduction": "Welcome to our blog where we share insights, stories, and knowledge.",
-		"jwt_secret":        "", // Will be generated if not present
+		"blog_name":        "Blanko Blog",
+		"blog_description": "A simple and elegant blog platform",
+		"jwt_secret":       "", // Will be generated if not present
 	}
 
 	for key, defaultValue := range defaults {
@@ -106,10 +105,9 @@ func (s *ConfigService) setDefaultConfigs(configMap map[string]string) {
 // getDefaultValue returns the default value for a known configuration key
 func (s *ConfigService) getDefaultValue(key string) string {
 	defaults := map[string]string{
-		"blog_name":         "Blanko Blog",
-		"blog_description":  "A simple and elegant blog platform",
-		"blog_introduction": "Welcome to our blog where we share insights, stories, and knowledge.",
-		"jwt_secret":        "", // Will be generated if not present
+		"blog_name":        "Blanko Blog",
+		"blog_description": "A simple and elegant blog platform",
+		"jwt_secret":       "", // Will be generated if not present
 	}
 
 	return defaults[key]
@@ -127,11 +125,6 @@ func (s *ConfigService) InitializeDefaultConfigs() error {
 			Key:         "blog_description",
 			Value:       "A simple and elegant blog platform",
 			Description: "A brief description of the blog",
-		},
-		"blog_introduction": {
-			Key:         "blog_introduction",
-			Value:       "Welcome to our blog where we share insights, stories, and knowledge.",
-			Description: "An introduction text displayed on the homepage",
 		},
 		"jwt_secret": {
 			Key:         "jwt_secret",

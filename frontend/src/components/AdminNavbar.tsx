@@ -151,7 +151,7 @@ const AdminNavbar: React.FC = () => {
                   },
                 }}
               >
-                Back to Site
+                Go to Site
               </Button>
             </>
           )}
@@ -209,7 +209,7 @@ const AdminNavbar: React.FC = () => {
               <ListItemIcon>
                 <Home />
               </ListItemIcon>
-              <ListItemText primary="Back to Site" />
+              <ListItemText primary="Go to Site" />
             </ListItemButton>
           </ListItem>
         </List>

@@ -116,7 +116,8 @@ const AdminSettingsPage: React.FC = () => {
         configs: {
           blog_name: config.blog_name || '',
           blog_description: config.blog_description || '',
-          blog_introduction: config.blog_introduction || '',
+          font_family: config.font_family || '',
+          font_url: config.font_url || '',
         }
       }
       
@@ -191,7 +192,8 @@ const AdminSettingsPage: React.FC = () => {
           <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
               <Tab label="Blog Settings" {...a11yProps(0)} />
-              <Tab label="User Settings" {...a11yProps(1)} />
+              <Tab label="Appearance" {...a11yProps(1)} />
+              <Tab label="User Settings" {...a11yProps(2)} />
             </Tabs>
           </Box>
 
@@ -221,15 +223,6 @@ const AdminSettingsPage: React.FC = () => {
                   onChange={(e) => handleConfigChange('blog_description', e.target.value)}
                   helperText="A brief description of your blog"
                 />
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={4}
-                  label="Blog Introduction"
-                  value={config.blog_introduction || ''}
-                  onChange={(e) => handleConfigChange('blog_introduction', e.target.value)}
-                  helperText="An introduction text displayed on the homepage"
-                />
                 <Button
                   variant="contained"
                   startIcon={<Save />}
@@ -244,6 +237,47 @@ const AdminSettingsPage: React.FC = () => {
           </TabPanel>
 
           <TabPanel value={tabValue} index={1}>
+            <Typography variant="h6" gutterBottom>
+              Appearance Settings
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
+              Customize the visual appearance of your blog for visitors.
+            </Typography>
+
+            {configLoading ? (
+              <Typography>Loading...</Typography>
+            ) : (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <TextField
+                  fullWidth
+                  label="Font Family"
+                  value={config.font_family || ''}
+                  onChange={(e) => handleConfigChange('font_family', e.target.value)}
+                  helperText="Font name (e.g., 'Roboto', 'Inter', 'Merriweather'). Leave empty for default."
+                  placeholder="Roboto"
+                />
+                <TextField
+                  fullWidth
+                  label="Google Font URL (Optional)"
+                  value={config.font_url || ''}
+                  onChange={(e) => handleConfigChange('font_url', e.target.value)}
+                  helperText="Google Fonts URL to load web font (e.g., https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap)"
+                  placeholder="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap"
+                />
+                <Button
+                  variant="contained"
+                  startIcon={<Save />}
+                  onClick={handleConfigSave}
+                  disabled={configSaving}
+                  sx={{ alignSelf: 'flex-start', mt: 2 }}
+                >
+                  {configSaving ? 'Saving...' : 'Save Appearance Settings'}
+                </Button>
+              </Box>
+            )}
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={2}>
             <Typography variant="h6" gutterBottom>
               Password Settings
             </Typography>
