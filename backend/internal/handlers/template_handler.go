@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"time"
@@ -27,7 +28,7 @@ type TemplateHandler struct {
 // NewTemplateHandler creates a new template handler
 func NewTemplateHandler(db *gorm.DB, configService *services.ConfigService) *TemplateHandler {
 	// Parse all HTML templates
-	templates, err := template.ParseGlob(filepath.Join("templates", "html", "*.html"))
+	templates, err := template.ParseGlob(filepath.Join("templates", "html", "*.gohtml"))
 	if err != nil {
 		log.Printf("Warning: Failed to parse templates: %v", err)
 	}
@@ -122,7 +123,7 @@ type PaginationData struct {
 }
 
 // getBaseData gets common template data
-func (h *TemplateHandler) getBaseData() (string, string, string, error) {
+func (h *TemplateHandler) getBaseData(c *gin.Context) (string, string, string, error) {
 	blogName, err := h.configService.GetConfig("blog_name")
 	if err != nil || blogName == "" {
 		blogName = "BlankoBlog"
@@ -133,9 +134,15 @@ func (h *TemplateHandler) getBaseData() (string, string, string, error) {
 		blogDescription = "A simple blog"
 	}
 
-	baseURL, err := h.configService.GetConfig("base_url")
-	if err != nil || baseURL == "" {
-		baseURL = "http://localhost:8080"
+	// Auto-detect base URL from request
+	baseURL := os.Getenv("BASE_URL")
+	if baseURL == "" {
+		// Auto-detect from request
+		scheme := "http"
+		if c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https" {
+			scheme = "https"
+		}
+		baseURL = scheme + "://" + c.Request.Host
 	}
 
 	return blogName, blogDescription, baseURL, nil
@@ -247,7 +254,7 @@ func (h *TemplateHandler) RenderPostList(c *gin.Context) {
 	pagination.Total = int(total)
 
 	// Get base data
-	blogName, blogDescription, baseURL, _ := h.getBaseData()
+	blogName, blogDescription, baseURL, _ := h.getBaseData(c)
 
 	data := PostListData{
 		BlogName:        blogName,
@@ -258,7 +265,7 @@ func (h *TemplateHandler) RenderPostList(c *gin.Context) {
 		Pagination:      pagination,
 	}
 
-	if err := h.templates.ExecuteTemplate(c.Writer, "post-list.html", data); err != nil {
+	if err := h.templates.ExecuteTemplate(c.Writer, "post-list.gohtml", data); err != nil {
 		log.Printf("Error rendering template: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
 	}
@@ -300,7 +307,7 @@ func (h *TemplateHandler) RenderPostDetail(c *gin.Context) {
 	}
 
 	// Get base data
-	blogName, blogDescription, baseURL, _ := h.getBaseData()
+	blogName, blogDescription, baseURL, _ := h.getBaseData(c)
 
 	data := PostDetailData{
 		BlogName:        blogName,
@@ -311,7 +318,7 @@ func (h *TemplateHandler) RenderPostDetail(c *gin.Context) {
 		Comments:        commentData,
 	}
 
-	if err := h.templates.ExecuteTemplate(c.Writer, "post-detail.html", data); err != nil {
+	if err := h.templates.ExecuteTemplate(c.Writer, "post-detail.gohtml", data); err != nil {
 		log.Printf("Error rendering template: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
 	}
@@ -340,7 +347,7 @@ func (h *TemplateHandler) RenderTagList(c *gin.Context) {
 	}
 
 	// Get base data
-	blogName, blogDescription, baseURL, _ := h.getBaseData()
+	blogName, blogDescription, baseURL, _ := h.getBaseData(c)
 
 	data := TagListData{
 		BlogName:        blogName,
@@ -350,7 +357,7 @@ func (h *TemplateHandler) RenderTagList(c *gin.Context) {
 		Tags:            tagData,
 	}
 
-	if err := h.templates.ExecuteTemplate(c.Writer, "tag-list.html", data); err != nil {
+	if err := h.templates.ExecuteTemplate(c.Writer, "tag-list.gohtml", data); err != nil {
 		log.Printf("Error rendering template: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
 	}
@@ -407,7 +414,7 @@ func (h *TemplateHandler) RenderTagPosts(c *gin.Context) {
 	pagination.Total = int(total)
 
 	// Get base data
-	blogName, blogDescription, baseURL, _ := h.getBaseData()
+	blogName, blogDescription, baseURL, _ := h.getBaseData(c)
 
 	tagDataSingle := &TagData{
 		ID:    tag.ID,
@@ -425,7 +432,7 @@ func (h *TemplateHandler) RenderTagPosts(c *gin.Context) {
 		Pagination:      pagination,
 	}
 
-	if err := h.templates.ExecuteTemplate(c.Writer, "tag-list.html", data); err != nil {
+	if err := h.templates.ExecuteTemplate(c.Writer, "tag-list.gohtml", data); err != nil {
 		log.Printf("Error rendering template: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
 	}

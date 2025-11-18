@@ -18,7 +18,7 @@
         <i>
             <time datetime="{{.Post.CreatedAt}}">{{.Post.FormattedDate}}</time>
             {{if .Post.Tags}}
-            · Tags: 
+            · 
             {{range $index, $tag := .Post.Tags}}{{if $index}}, {{end}}<a href="/tags/{{$tag.ID}}/posts">{{$tag.Name}}</a>{{end}}
             {{end}}
         </i>
@@ -29,13 +29,6 @@
     <article>
         {{.Post.ContentHTML}}
     </article>
-    {{if .Post.Tags}}
-    <p class="tags">
-        {{range .Post.Tags}}
-        <a href="/tags/{{.ID}}/posts" style="background-color: {{.Color}}; color: white; padding: 2px 8px; border-radius: 3px; text-decoration: none;">{{.Name}}</a>
-        {{end}}
-    </p>
-    {{end}}
     <br/>
     
     <hr>
@@ -69,6 +62,7 @@
             <input type="text" name="name" class="form-control" placeholder="Your name *" required maxlength="100">
             <input type="email" name="email" class="form-control" placeholder="Your email (optional)" maxlength="255">
             <textarea name="content" id="textarea" class="form-control" placeholder="Leave a comment..." required maxlength="2000"></textarea>
+            <p class="comment-help-text" style="font-size: 0.8rem; margin: 5px 0;">Comment may need to be reviewed before it appears on the website.</p>
             <button type="submit" class="submit">Post Comment</button>
         </form>
     </div>
@@ -80,6 +74,7 @@
         <nav>
             <a href="/">Home</a>
             <a href="/tags">Tags</a>
+            <a href="/feed">RSS</a>
         </nav>
     </span>
     <span>
