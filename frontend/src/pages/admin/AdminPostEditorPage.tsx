@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import {
   Box,
   Typography,
@@ -14,7 +14,7 @@ import {
   Tabs,
   Tab,
 } from '@mui/material'
-import { ArrowBack, Save } from '@mui/icons-material'
+import { ArrowBack, Save, CloudDone, CloudQueue } from '@mui/icons-material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
@@ -26,6 +26,8 @@ import MDEditor from '@uiw/react-md-editor'
 import '@uiw/react-md-editor/markdown-editor.css'
 import AdminNavbar from '../../components/AdminNavbar'
 
+const AUTO_SAVE_DELAY = 30000 // 30 seconds after last change
+
 const PostEditorPage: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
@@ -33,9 +35,12 @@ const PostEditorPage: React.FC = () => {
   
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [autoSaving, setAutoSaving] = useState(false)
   const [error, setError] = useState<string>('')
   const [success, setSuccess] = useState<string>('')
   const [rightPanelTab, setRightPanelTab] = useState(0)
+  const [postId, setPostId] = useState<number | null>(id && id !== 'new' ? parseInt(id) : null)
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
   const [post, setPost] = useState({
     title: '',
     content: '',
@@ -45,7 +50,10 @@ const PostEditorPage: React.FC = () => {
     tags: [] as Tag[],
   })
 
-  const isEditing = Boolean(id && id !== 'new')
+  const autoSaveTimerRef = useRef<number | null>(null)
+  const initialPostRef = useRef<string>('')
+
+  const isEditing = Boolean(postId)
   const pageTitle = isEditing ? 'Edit Post' : 'Create New Post'
   useDocumentTitle(pageTitle)
 
@@ -70,19 +78,22 @@ const PostEditorPage: React.FC = () => {
   // Load post data if editing
   useEffect(() => {
     const loadPost = async () => {
-      if (isEditing && id) {
+      if (isEditing && postId) {
         try {
           setLoading(true)
-          const response = await postsAPI.getAdminPost(parseInt(id))
+          const response = await postsAPI.getAdminPost(postId)
           const postData = response.data
-          setPost({
+          const loadedPost = {
             title: postData.title,
             content: postData.content,
             summary: postData.summary,
             slug: postData.slug,
             published: postData.published,
             tags: postData.tags || [],
-          })
+          }
+          setPost(loadedPost)
+          // Store initial state for comparison
+          initialPostRef.current = JSON.stringify(loadedPost)
         } catch (err) {
           console.error('Error loading post:', err)
           setError('Failed to load post')
@@ -95,15 +106,31 @@ const PostEditorPage: React.FC = () => {
     if (isAuthenticated) {
       loadPost()
     }
-  }, [isAuthenticated, isEditing, id])
+  }, [isAuthenticated, isEditing, postId])
 
-  const handleSave = async () => {
+  // Check if post has changes from initial state
+  const hasChanges = useCallback(() => {
+    const currentPost = JSON.stringify(post)
+    return currentPost !== initialPostRef.current
+  }, [post])
+
+  // Auto-save function (silent)
+  const performAutoSave = useCallback(async () => {
+    // Don't auto-save if title or content is empty
+    if (!post.title.trim() || !post.content.trim()) {
+      return
+    }
+
+    // Don't auto-save if no changes
+    if (!hasChanges()) {
+      return
+    }
+
     try {
-      setSaving(true)
-      setError('')
-      setSuccess('')
+      setAutoSaving(true)
 
-      if (isEditing && id) {
+      if (postId) {
+        // Update existing post
         const updateData: UpdatePostRequest = {
           title: post.title,
           content: post.content,
@@ -112,9 +139,80 @@ const PostEditorPage: React.FC = () => {
           published: post.published,
           tag_ids: post.tags.map(tag => tag.id),
         }
-        await postsAPI.updatePost(parseInt(id), updateData)
-        setSuccess('Post updated successfully!')
+        await postsAPI.updatePost(postId, updateData)
       } else {
+        // Create new post
+        const createData: CreatePostRequest = {
+          title: post.title,
+          content: post.content,
+          summary: post.summary,
+          slug: post.slug || undefined,
+          published: post.published,
+          tag_ids: post.tags.map(tag => tag.id),
+        }
+        const response = await postsAPI.createPost(createData)
+        
+        // Update post ID and URL silently without reloading
+        if (response.data?.id) {
+          setPostId(response.data.id)
+          navigate(`/posts/${response.data.id}`, { replace: true })
+        }
+      }
+
+      // Update saved state
+      initialPostRef.current = JSON.stringify(post)
+      setLastSavedAt(new Date())
+    } catch (err) {
+      console.error('Auto-save failed:', err)
+      // Don't show error for auto-save to avoid disruption
+    } finally {
+      setAutoSaving(false)
+    }
+  }, [post, postId, navigate, hasChanges])
+
+  // Trigger auto-save on changes
+  useEffect(() => {
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current)
+    }
+
+    // Set new timer
+    autoSaveTimerRef.current = setTimeout(() => {
+      performAutoSave()
+    }, AUTO_SAVE_DELAY)
+
+    // Cleanup on unmount
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current)
+      }
+    }
+  }, [post, performAutoSave])
+
+  // Manual save function (with user feedback)
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      setError('')
+      setSuccess('')
+
+      if (postId) {
+        // Update existing post
+        const updateData: UpdatePostRequest = {
+          title: post.title,
+          content: post.content,
+          summary: post.summary,
+          slug: post.slug || undefined,
+          published: post.published,
+          tag_ids: post.tags.map(tag => tag.id),
+        }
+        await postsAPI.updatePost(postId, updateData)
+        setSuccess('Post updated successfully!')
+        initialPostRef.current = JSON.stringify(post)
+        setLastSavedAt(new Date())
+      } else {
+        // Create new post
         const createData: CreatePostRequest = {
           title: post.title,
           content: post.content,
@@ -126,8 +224,11 @@ const PostEditorPage: React.FC = () => {
         const response = await postsAPI.createPost(createData)
         setSuccess('Post created successfully!')
         
-        // Navigate to edit mode for the newly created post
+        // Navigate to edit mode for the newly created post (manual save)
         if (response.data?.id) {
+          setPostId(response.data.id)
+          initialPostRef.current = JSON.stringify(post)
+          setLastSavedAt(new Date())
           navigate(`/posts/${response.data.id}`, { replace: true })
         }
       }
@@ -197,15 +298,32 @@ const PostEditorPage: React.FC = () => {
                 {pageTitle}
               </Typography>
             </Box>
-            <Button
-              variant="contained"
-              startIcon={<Save />}
-              onClick={handleSave}
-              disabled={saving || !post.title.trim() || !post.content.trim()}
-              size="large"
-            >
-              {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              {/* Auto-save indicator */}
+              {autoSaving && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+                  <CloudQueue fontSize="small" />
+                  <Typography variant="body2">Saving...</Typography>
+                </Box>
+              )}
+              {!autoSaving && lastSavedAt && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'success.main' }}>
+                  <CloudDone fontSize="small" />
+                  <Typography variant="body2">
+                    Saved {lastSavedAt.toLocaleTimeString()}
+                  </Typography>
+                </Box>
+              )}
+              <Button
+                variant="contained"
+                startIcon={<Save />}
+                onClick={handleSave}
+                disabled={saving || !post.title.trim() || !post.content.trim()}
+                size="large"
+              >
+                {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
+              </Button>
+            </Box>
           </Box>
         </Box>
 
@@ -376,7 +494,7 @@ const PostEditorPage: React.FC = () => {
               {rightPanelTab === 1 && (
                 <Box>
                   <PostFileUploader 
-                    postId={isEditing && id ? parseInt(id) : null}
+                    postId={postId}
                   />
                 </Box>
               )}
