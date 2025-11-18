@@ -102,22 +102,24 @@ type PostResponse struct {
 
 // CreatePostRequest represents the request to create a new post
 type CreatePostRequest struct {
-	Title     string   `json:"title" validate:"required,min=1,max=200"`
-	Content   string   `json:"content" validate:"required,min=1"`
-	Summary   string   `json:"summary"`
-	Slug      string   `json:"slug,omitempty"`
-	Published bool     `json:"published"`
-	TagIDs    []uint   `json:"tag_ids,omitempty"`
+	Title     string     `json:"title" validate:"required,min=1,max=200"`
+	Content   string     `json:"content" validate:"required,min=1"`
+	Summary   string     `json:"summary"`
+	Slug      string     `json:"slug,omitempty"`
+	Published bool       `json:"published"`
+	TagIDs    []uint     `json:"tag_ids,omitempty"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
 }
 
 // UpdatePostRequest represents the request to update a post
 type UpdatePostRequest struct {
-	Title     *string  `json:"title,omitempty" validate:"omitempty,min=1,max=200"`
-	Content   *string  `json:"content,omitempty" validate:"omitempty,min=1"`
-	Summary   *string  `json:"summary,omitempty"`
-	Slug      *string  `json:"slug,omitempty"`
-	Published *bool    `json:"published,omitempty"`
-	TagIDs    *[]uint  `json:"tag_ids,omitempty"`
+	Title     *string     `json:"title,omitempty" validate:"omitempty,min=1,max=200"`
+	Content   *string     `json:"content,omitempty" validate:"omitempty,min=1"`
+	Summary   *string     `json:"summary,omitempty"`
+	Slug      *string     `json:"slug,omitempty"`
+	Published *bool       `json:"published,omitempty"`
+	TagIDs    *[]uint     `json:"tag_ids,omitempty"`
+	CreatedAt *time.Time  `json:"created_at,omitempty"`
 }
 
 // LoginRequest represents the login request

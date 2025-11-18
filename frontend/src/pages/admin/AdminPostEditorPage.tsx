@@ -48,6 +48,7 @@ const PostEditorPage: React.FC = () => {
     slug: '',
     published: false,
     tags: [] as Tag[],
+    created_at: '',
   })
 
   const autoSaveTimerRef = useRef<number | null>(null)
@@ -90,6 +91,7 @@ const PostEditorPage: React.FC = () => {
             slug: postData.slug,
             published: postData.published,
             tags: postData.tags || [],
+            created_at: postData.created_at || '',
           }
           setPost(loadedPost)
           // Store initial state for comparison
@@ -138,6 +140,7 @@ const PostEditorPage: React.FC = () => {
           slug: post.slug || undefined,
           published: post.published,
           tag_ids: post.tags.map(tag => tag.id),
+          created_at: post.created_at || undefined,
         }
         await postsAPI.updatePost(postId, updateData)
       } else {
@@ -149,6 +152,7 @@ const PostEditorPage: React.FC = () => {
           slug: post.slug || undefined,
           published: post.published,
           tag_ids: post.tags.map(tag => tag.id),
+          created_at: post.created_at || undefined,
         }
         const response = await postsAPI.createPost(createData)
         
@@ -206,6 +210,7 @@ const PostEditorPage: React.FC = () => {
           slug: post.slug || undefined,
           published: post.published,
           tag_ids: post.tags.map(tag => tag.id),
+          created_at: post.created_at || undefined,
         }
         await postsAPI.updatePost(postId, updateData)
         setSuccess('Post updated successfully!')
@@ -220,6 +225,7 @@ const PostEditorPage: React.FC = () => {
           slug: post.slug || undefined,
           published: post.published,
           tag_ids: post.tags.map(tag => tag.id),
+          created_at: post.created_at || undefined,
         }
         const response = await postsAPI.createPost(createData)
         setSuccess('Post created successfully!')
@@ -451,6 +457,41 @@ const PostEditorPage: React.FC = () => {
                     >
                       Generate from Title
                     </Button>
+                  </Box>
+
+                  <Divider sx={{ my: 3 }} />
+
+                  {/* Publish Time */}
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                      Publish Time
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      type="datetime-local"
+                      value={post.created_at ? new Date(post.created_at).toISOString().slice(0, 16) : ''}
+                      onChange={(e) => {
+                        const newDate = e.target.value ? new Date(e.target.value).toISOString() : ''
+                        handleFieldChange('created_at', newDate)
+                      }}
+                      variant="outlined"
+                      helperText="Set a custom publish date and time (leave empty for automatic)"
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                    {post.created_at && (
+                      <Button
+                        size="small"
+                        onClick={() => handleFieldChange('created_at', '')}
+                        sx={{ mt: 1 }}
+                        fullWidth
+                        variant="outlined"
+                      >
+                        Clear (Use Automatic)
+                      </Button>
+                    )}
                   </Box>
 
                   <Divider sx={{ my: 3 }} />

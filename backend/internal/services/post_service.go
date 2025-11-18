@@ -102,6 +102,11 @@ func (s *PostService) CreatePost(req models.CreatePostRequest) (*models.Post, er
 		Published: req.Published,
 	}
 
+	// Set custom created_at if provided
+	if req.CreatedAt != nil {
+		post.CreatedAt = *req.CreatedAt
+	}
+
 	// Create post first
 	if err := s.db.Create(&post).Error; err != nil {
 		return nil, err
@@ -164,6 +169,9 @@ func (s *PostService) UpdatePost(id uint, req models.UpdatePostRequest) (*models
 	}
 	if req.Published != nil {
 		post.Published = *req.Published
+	}
+	if req.CreatedAt != nil {
+		post.CreatedAt = *req.CreatedAt
 	}
 
 	// Handle tag updates if provided

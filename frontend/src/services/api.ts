@@ -171,6 +171,7 @@ export interface CreatePostRequest {
   slug?: string
   published: boolean
   tag_ids?: number[]
+  created_at?: string
 }
 
 export interface UpdatePostRequest {
@@ -180,6 +181,7 @@ export interface UpdatePostRequest {
   slug?: string
   published?: boolean
   tag_ids?: number[]
+  created_at?: string
 }
 
 export interface CreateTagRequest {
