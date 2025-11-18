@@ -221,7 +221,7 @@ const AdminFilesPage: React.FC = () => {
                           <IconButton
                             size="small"
                             color="primary"
-                            onClick={() => navigate(`/admin/files/${file.id}`)}
+                            onClick={() => navigate(`/files/${file.id}`)}
                           >
                             <Edit />
                           </IconButton>

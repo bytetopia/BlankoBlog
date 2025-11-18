@@ -8,8 +8,6 @@ import {
   Switch,
   CircularProgress,
   Alert,
-  AppBar,
-  Toolbar,
   IconButton,
   Divider,
   Chip,
@@ -17,7 +15,7 @@ import {
   Tab,
 } from '@mui/material'
 import { ArrowBack, Save } from '@mui/icons-material'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { postsAPI } from '../../services/api'
@@ -32,7 +30,6 @@ const PostEditorPage: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
-  const location = useLocation()
   
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -131,7 +128,7 @@ const PostEditorPage: React.FC = () => {
         
         // Navigate to edit mode for the newly created post
         if (response.data?.id) {
-          navigate(`/admin/posts/${response.data.id}`, { replace: true })
+          navigate(`/posts/${response.data.id}`, { replace: true })
         }
       }
     } catch (err) {
@@ -143,13 +140,7 @@ const PostEditorPage: React.FC = () => {
   }
 
   const handleBack = () => {
-    // Check if we're on an admin route
-    const isAdminRoute = location.pathname.startsWith('/admin')
-    if (isAdminRoute) {
-      navigate('/admin/posts')
-    } else {
-      navigate('/admin') // fallback
-    }
+    navigate('/posts')
   }
 
   const handleFieldChange = (field: string, value: string | boolean | Tag[]) => {
@@ -179,10 +170,9 @@ const PostEditorPage: React.FC = () => {
   }
 
   if (loading) {
-    const isAdminRoute = location.pathname.startsWith('/admin')
     return (
       <Box>
-        {isAdminRoute && <AdminNavbar />}
+        <AdminNavbar />
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
           <CircularProgress />
         </Box>
@@ -190,65 +180,34 @@ const PostEditorPage: React.FC = () => {
     )
   }
 
-  const isAdminRoute = location.pathname.startsWith('/admin')
-
   return (
     <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {isAdminRoute ? (
-        <AdminNavbar />
-      ) : (
-        <AppBar position="static" color="default" elevation={1}>
-          <Toolbar>
-            <IconButton
-              edge="start"
-              onClick={handleBack}
-              sx={{ mr: 2 }}
-            >
-              <ArrowBack />
-            </IconButton>
-            
-            <Typography variant="h6" sx={{ flexGrow: 1 }}>
-              {pageTitle}
-            </Typography>
-            
+      <AdminNavbar />
+
+      {/* Content */}
+      <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Page header */}
+        <Box sx={{ px: 3, py: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconButton onClick={handleBack}>
+                <ArrowBack />
+              </IconButton>
+              <Typography variant="h5" component="h1">
+                {pageTitle}
+              </Typography>
+            </Box>
             <Button
               variant="contained"
               startIcon={<Save />}
               onClick={handleSave}
               disabled={saving || !post.title.trim() || !post.content.trim()}
+              size="large"
             >
               {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
             </Button>
-          </Toolbar>
-        </AppBar>
-      )}
-
-      {/* Content */}
-      <Box sx={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {/* Page header for admin routes */}
-        {isAdminRoute && (
-          <Box sx={{ px: 3, py: 2, bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                <IconButton onClick={handleBack}>
-                  <ArrowBack />
-                </IconButton>
-                <Typography variant="h5" component="h1">
-                  {pageTitle}
-                </Typography>
-              </Box>
-              <Button
-                variant="contained"
-                startIcon={<Save />}
-                onClick={handleSave}
-                disabled={saving || !post.title.trim() || !post.content.trim()}
-                size="large"
-              >
-                {saving ? 'Saving...' : (isEditing ? 'Update' : 'Create')}
-              </Button>
-            </Box>
           </Box>
-        )}
+        </Box>
 
         {/* Alerts */}
         {(error || success) && (

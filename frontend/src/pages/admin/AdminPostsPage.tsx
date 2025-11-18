@@ -66,11 +66,11 @@ const AdminPostsPage: React.FC = () => {
   }, [isAuthenticated])
 
   const handleCreatePost = () => {
-    navigate('/admin/posts/new')
+    navigate('/posts/new')
   }
 
   const handleEditPost = (post: BlogPost) => {
-    navigate(`/admin/posts/${post.id}`)
+    navigate(`/posts/${post.id}`)
   }
 
   const handleDeletePost = async (id: number) => {

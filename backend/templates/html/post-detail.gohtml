@@ -7,7 +7,16 @@
     <link rel="canonical" href="{{.BaseURL}}/posts/{{.Post.Slug}}">
     <meta name="description" content="{{.Post.Summary}}">
     <link rel="alternate" type="application/rss+xml" title="{{.BlogName}} RSS Feed" href="{{.BaseURL}}/feed">
-    <link rel="stylesheet" href="/static/css/post-style.css">
+    <link rel="stylesheet" href="/static/post-assets/post-style.css">
+    <link rel="stylesheet" href="/static/post-assets/github.min.css">
+    <script src="/static/post-assets/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        });
+    </script>
 </head>
 <body class="home">
 <header>

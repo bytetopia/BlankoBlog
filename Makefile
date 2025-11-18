@@ -26,9 +26,9 @@ build: ## Build both backend and frontend for production
 	@echo "Copying frontend artifacts to backend..."
 	rm -rf backend/static
 	cp -r frontend/dist backend/static
-	@echo "Copying CSS templates..."
-	mkdir -p backend/static/css
-	cp backend/templates/css/post-style.css backend/static/css/
+	@echo "Copying post assets..."
+	mkdir -p backend/static/post-assets
+	cp backend/templates/post-assets/* backend/static/post-assets/
 	@echo "Building backend..."
 	cd backend && go build -o bin/server cmd/server/main.go
 

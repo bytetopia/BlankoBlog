@@ -35,8 +35,8 @@ COPY backend/ ./
 # Copy built frontend files to static directory
 COPY --from=frontend-builder /app/frontend/dist ./static
 
-# Copy CSS templates to static directory
-COPY backend/templates/css/post-style.css ./static/css/
+# Copy post assets to static directory
+COPY backend/templates/post-assets/ ./static/post-assets/
 
 # Build the Go application
 RUN CGO_ENABLED=1 GOOS=linux go build -o main cmd/server/main.go

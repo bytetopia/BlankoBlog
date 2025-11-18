@@ -119,7 +119,7 @@ const AdminFileEditorPage: React.FC = () => {
       setError('');
       await filesAPI.deleteFile(file.id);
       setSuccess('File deleted successfully');
-      setTimeout(() => navigate('/admin/files'), 1500);
+      setTimeout(() => navigate('/files'), 1500);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to delete file');
       setDeleteConfirmOpen(false);
@@ -167,7 +167,7 @@ const AdminFileEditorPage: React.FC = () => {
         <Box sx={{ mb: 4 }}>
           <Button
             startIcon={<ArrowBack />}
-            onClick={() => navigate('/admin/files')}
+            onClick={() => navigate('/files')}
             sx={{ mb: 2 }}
           >
             Back to Files
