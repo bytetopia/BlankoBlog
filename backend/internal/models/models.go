@@ -310,3 +310,9 @@ func (f *File) ToResponse() FileResponse {
 	
 	return response
 }
+
+// FooterLink represents a single footer link with display text and URL
+type FooterLink struct {
+	Text string `json:"text" validate:"required,min=1,max=100"`
+	URL  string `json:"url" validate:"required,url"`
+}

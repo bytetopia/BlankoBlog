@@ -3,6 +3,7 @@ package services
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 
 	"gorm.io/gorm"
@@ -185,4 +186,45 @@ func (s *ConfigService) generateRandomSecret(length int) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+// GetFooterLinks retrieves footer links from config as a JSON array
+func (s *ConfigService) GetFooterLinks() ([]models.FooterLink, error) {
+	footerLinksJSON, err := s.GetConfig("footer_links")
+	if err != nil {
+		// Return default footer links if not found
+		return s.getDefaultFooterLinks(), nil
+	}
+
+	if footerLinksJSON == "" {
+		return s.getDefaultFooterLinks(), nil
+	}
+
+	var footerLinks []models.FooterLink
+	if err := json.Unmarshal([]byte(footerLinksJSON), &footerLinks); err != nil {
+		return s.getDefaultFooterLinks(), err
+	}
+
+	return footerLinks, nil
+}
+
+// getDefaultFooterLinks returns the default footer links
+func (s *ConfigService) getDefaultFooterLinks() []models.FooterLink {
+	return []models.FooterLink{
+		{Text: "Home", URL: "/"},
+		{Text: "Tags", URL: "/tags"},
+		{Text: "RSS", URL: "/feed"},
+	}
+}
+
+// SetFooterLinks saves footer links to config as JSON
+func (s *ConfigService) SetFooterLinks(links []models.FooterLink) error {
+	linksJSON, err := json.Marshal(links)
+	if err != nil {
+		return err
+	}
+
+	return s.UpdateConfigs(map[string]string{
+		"footer_links": string(linksJSON),
+	})
 }

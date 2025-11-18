@@ -14,8 +14,16 @@ import {
   FormControl,
   InputLabel,
   FormHelperText,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material'
-import { Save, Lock, Settings as SettingsIcon } from '@mui/icons-material'
+import { Save, Lock, Settings as SettingsIcon, Add, Edit, Delete } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
@@ -27,6 +35,11 @@ interface TabPanelProps {
   children?: React.ReactNode
   index: number
   value: number
+}
+
+interface FooterLink {
+  text: string
+  url: string
 }
 
 function TabPanel(props: TabPanelProps) {
@@ -76,6 +89,10 @@ const AdminSettingsPage: React.FC = () => {
     message: '',
     severity: 'success' as 'success' | 'error'
   })
+  const [footerLinks, setFooterLinks] = useState<FooterLink[]>([])
+  const [footerDialogOpen, setFooterDialogOpen] = useState(false)
+  const [editingFooterIndex, setEditingFooterIndex] = useState<number | null>(null)
+  const [footerFormData, setFooterFormData] = useState({ text: '', url: '' })
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -94,6 +111,27 @@ const AdminSettingsPage: React.FC = () => {
       setConfigLoading(true)
       const response = await settingsAPI.getConfig()
       setConfig(response.data.configs)
+      
+      // Parse footer links from config
+      if (response.data.configs.footer_links) {
+        try {
+          const links = JSON.parse(response.data.configs.footer_links)
+          setFooterLinks(links)
+        } catch (e) {
+          console.error('Failed to parse footer links:', e)
+          setFooterLinks([
+            { text: 'Home', url: '/' },
+            { text: 'Tags', url: '/tags' },
+            { text: 'RSS', url: '/feed' }
+          ])
+        }
+      } else {
+        setFooterLinks([
+          { text: 'Home', url: '/' },
+          { text: 'Tags', url: '/tags' },
+          { text: 'RSS', url: '/feed' }
+        ])
+      }
     } catch (error) {
       console.error('Failed to load config:', error)
       showSnackbar('Failed to load settings', 'error')
@@ -181,6 +219,68 @@ const AdminSettingsPage: React.FC = () => {
     setSnackbar(prev => ({ ...prev, open: false }))
   }
 
+  const handleAddFooterLink = () => {
+    setEditingFooterIndex(null)
+    setFooterFormData({ text: '', url: '' })
+    setFooterDialogOpen(true)
+  }
+
+  const handleEditFooterLink = (index: number) => {
+    setEditingFooterIndex(index)
+    setFooterFormData(footerLinks[index])
+    setFooterDialogOpen(true)
+  }
+
+  const handleDeleteFooterLink = (index: number) => {
+    const newLinks = footerLinks.filter((_, i) => i !== index)
+    setFooterLinks(newLinks)
+  }
+
+  const handleFooterDialogClose = () => {
+    setFooterDialogOpen(false)
+    setFooterFormData({ text: '', url: '' })
+    setEditingFooterIndex(null)
+  }
+
+  const handleFooterDialogSave = () => {
+    if (!footerFormData.text || !footerFormData.url) {
+      showSnackbar('Please fill in all fields', 'error')
+      return
+    }
+
+    if (editingFooterIndex !== null) {
+      // Edit existing link
+      const newLinks = [...footerLinks]
+      newLinks[editingFooterIndex] = footerFormData
+      setFooterLinks(newLinks)
+    } else {
+      // Add new link
+      setFooterLinks([...footerLinks, footerFormData])
+    }
+    
+    handleFooterDialogClose()
+  }
+
+  const handleSaveFooterLinks = async () => {
+    try {
+      setConfigSaving(true)
+      const updateRequest: UpdateConfigRequest = {
+        configs: {
+          footer_links: JSON.stringify(footerLinks)
+        }
+      }
+      
+      await settingsAPI.updateConfig(updateRequest)
+      await refetchConfig()
+      showSnackbar('Footer links saved successfully!', 'success')
+    } catch (error) {
+      console.error('Failed to save footer links:', error)
+      showSnackbar('Failed to save footer links', 'error')
+    } finally {
+      setConfigSaving(false)
+    }
+  }
+
   if (!isAuthenticated) {
     return null
   }
@@ -199,7 +299,8 @@ const AdminSettingsPage: React.FC = () => {
             <Tabs value={tabValue} onChange={handleTabChange} aria-label="settings tabs">
               <Tab label="Blog Settings" {...a11yProps(0)} />
               <Tab label="Appearance" {...a11yProps(1)} />
-              <Tab label="User Settings" {...a11yProps(2)} />
+              <Tab label="Footer Links" {...a11yProps(2)} />
+              <Tab label="User Settings" {...a11yProps(3)} />
             </Tabs>
           </Box>
 
@@ -299,6 +400,67 @@ const AdminSettingsPage: React.FC = () => {
 
           <TabPanel value={tabValue} index={2}>
             <Typography variant="h6" gutterBottom>
+              Footer Links
+            </Typography>
+            <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
+              Customize the links displayed in the footer of your blog.
+            </Typography>
+
+            {configLoading ? (
+              <Typography>Loading...</Typography>
+            ) : (
+              <Box>
+                <List>
+                  {footerLinks.map((link, index) => (
+                    <ListItem
+                      key={index}
+                      sx={{
+                        border: '1px solid',
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        mb: 1,
+                      }}
+                      secondaryAction={
+                        <>
+                          <IconButton edge="end" aria-label="edit" onClick={() => handleEditFooterLink(index)} sx={{ mr: 1 }}>
+                            <Edit />
+                          </IconButton>
+                          <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteFooterLink(index)}>
+                            <Delete />
+                          </IconButton>
+                        </>
+                      }
+                    >
+                      <ListItemText
+                        primary={link.text}
+                        secondary={link.url}
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<Add />}
+                    onClick={handleAddFooterLink}
+                  >
+                    Add Footer Link
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<Save />}
+                    onClick={handleSaveFooterLinks}
+                    disabled={configSaving}
+                  >
+                    {configSaving ? 'Saving...' : 'Save Footer Links'}
+                  </Button>
+                </Box>
+              </Box>
+            )}
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={3}>
+            <Typography variant="h6" gutterBottom>
               Password Settings
             </Typography>
             <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
@@ -354,6 +516,38 @@ const AdminSettingsPage: React.FC = () => {
             {snackbar.message}
           </Alert>
         </Snackbar>
+
+        <Dialog open={footerDialogOpen} onClose={handleFooterDialogClose} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            {editingFooterIndex !== null ? 'Edit Footer Link' : 'Add Footer Link'}
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2 }}>
+              <TextField
+                fullWidth
+                label="Link Text"
+                value={footerFormData.text}
+                onChange={(e) => setFooterFormData({ ...footerFormData, text: e.target.value })}
+                placeholder="e.g., Home, About, Contact"
+                required
+              />
+              <TextField
+                fullWidth
+                label="Link URL"
+                value={footerFormData.url}
+                onChange={(e) => setFooterFormData({ ...footerFormData, url: e.target.value })}
+                placeholder="e.g., /, /about, https://example.com"
+                required
+              />
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleFooterDialogClose}>Cancel</Button>
+            <Button onClick={handleFooterDialogSave} variant="contained">
+              {editingFooterIndex !== null ? 'Update' : 'Add'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Box>
   )

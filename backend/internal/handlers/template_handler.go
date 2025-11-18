@@ -49,6 +49,7 @@ type PostListData struct {
 	Year            int
 	Posts           []PostData
 	Pagination      PaginationData
+	FooterLinks     []models.FooterLink
 	T               i18n.Translations
 	Language        string
 }
@@ -61,6 +62,7 @@ type PostDetailData struct {
 	Year            int
 	Post            PostData
 	Comments        []CommentData
+	FooterLinks     []models.FooterLink
 	T               i18n.Translations
 	Language        string
 }
@@ -75,6 +77,7 @@ type TagListData struct {
 	Tags            []TagWithCountData
 	Posts           []PostData
 	Pagination      PaginationData
+	FooterLinks     []models.FooterLink
 	T               i18n.Translations
 	Language        string
 }
@@ -281,6 +284,9 @@ func (h *TemplateHandler) RenderPostList(c *gin.Context) {
 	// Get base data
 	blogName, blogDescription, baseURL, _ := h.getBaseData(c)
 
+	// Get footer links
+	footerLinks, _ := h.configService.GetFooterLinks()
+
 	data := PostListData{
 		BlogName:        blogName,
 		BlogDescription: blogDescription,
@@ -288,6 +294,7 @@ func (h *TemplateHandler) RenderPostList(c *gin.Context) {
 		Year:            time.Now().Year(),
 		Posts:           postData,
 		Pagination:      pagination,
+		FooterLinks:     footerLinks,
 		T:               h.getTranslations(),
 		Language:        h.getLanguage(),
 	}
@@ -336,6 +343,9 @@ func (h *TemplateHandler) RenderPostDetail(c *gin.Context) {
 	// Get base data
 	blogName, blogDescription, baseURL, _ := h.getBaseData(c)
 
+	// Get footer links
+	footerLinks, _ := h.configService.GetFooterLinks()
+
 	data := PostDetailData{
 		BlogName:        blogName,
 		BlogDescription: blogDescription,
@@ -343,6 +353,7 @@ func (h *TemplateHandler) RenderPostDetail(c *gin.Context) {
 		Year:            time.Now().Year(),
 		Post:            convertPostToData(post),
 		Comments:        commentData,
+		FooterLinks:     footerLinks,
 		T:               h.getTranslations(),
 		Language:        h.getLanguage(),
 	}
@@ -378,12 +389,16 @@ func (h *TemplateHandler) RenderTagList(c *gin.Context) {
 	// Get base data
 	blogName, blogDescription, baseURL, _ := h.getBaseData(c)
 
+	// Get footer links
+	footerLinks, _ := h.configService.GetFooterLinks()
+
 	data := TagListData{
 		BlogName:        blogName,
 		BlogDescription: blogDescription,
 		BaseURL:         baseURL,
 		Year:            time.Now().Year(),
 		Tags:            tagData,
+		FooterLinks:     footerLinks,
 		T:               h.getTranslations(),
 		Language:        h.getLanguage(),
 	}
@@ -447,6 +462,9 @@ func (h *TemplateHandler) RenderTagPosts(c *gin.Context) {
 	// Get base data
 	blogName, blogDescription, baseURL, _ := h.getBaseData(c)
 
+	// Get footer links
+	footerLinks, _ := h.configService.GetFooterLinks()
+
 	tagDataSingle := &TagData{
 		ID:    tag.ID,
 		Name:  tag.Name,
@@ -461,6 +479,7 @@ func (h *TemplateHandler) RenderTagPosts(c *gin.Context) {
 		Tag:             tagDataSingle,
 		Posts:           postData,
 		Pagination:      pagination,
+		FooterLinks:     footerLinks,
 		T:               h.getTranslations(),
 		Language:        h.getLanguage(),
 	}

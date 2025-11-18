@@ -81,9 +81,9 @@
 <footer>
     <span id="footer-directive">
         <nav>
-            <a href="/">{{.T.Home}}</a>
-            <a href="/tags">{{.T.Tags}}</a>
-            <a href="/feed">{{.T.RSS}}</a>
+            {{range .FooterLinks}}
+            <a href="{{.URL}}">{{.Text}}</a>
+            {{end}}
         </nav>
     </span>
     <span>
