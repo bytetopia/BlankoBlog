@@ -71,14 +71,14 @@
             <input type="text" name="name" class="form-control" placeholder="{{.T.YourName}}" required maxlength="100">
             <input type="email" name="email" class="form-control" placeholder="{{.T.YourEmail}}" maxlength="255">
             <textarea name="content" id="textarea" class="form-control" placeholder="{{.T.LeaveComment}}" required maxlength="2000"></textarea>
-            <p class="comment-help-text" style="font-size: 0.8rem; margin: 5px 0;">{{.T.CommentHelp}}</p>
             <button type="submit" class="submit">{{.T.PostComment}}</button>
+            <p class="comment-help-text" style="font-size: 0.8rem; margin: 10px 0; color:gray;">{{.T.CommentHelp}}</p>
         </form>
     </div>
     <br/>
 </main>
 
-<footer style="margin:50px 0px">
+<footer>
     <span id="footer-directive">
         <nav>
             <a href="/">{{.T.Home}}</a>

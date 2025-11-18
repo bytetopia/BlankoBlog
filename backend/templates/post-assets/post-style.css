@@ -104,9 +104,14 @@ blockquote footer {
 	font-size:0.9em;
 	color:#777;
 }
-header,footer {
+header {
 	padding:10px 0;
 }
+
+footer {
+	padding:60px 0;
+}
+
 .title h1,.title h2 {
 	font-size:3.5em;
 	font-weight: 400;
