@@ -54,38 +54,22 @@ func main() {
 	// API routes
 	api := r.Group("/api")
 	{
-		// Public routes
-		public := api.Group("/public")
-		{
-			public.GET("/posts", postHandler.GetPosts)
-			public.GET("/posts/:id", postHandler.GetPublicPost) // Public post detail with view count increment
-			public.GET("/tags", tagHandler.GetAllTags)
-			public.GET("/tags/with-counts", tagHandler.GetAllTagsWithPostCount)
-			public.GET("/tags/:id", tagHandler.GetTag)
-			public.GET("/tags/:id/posts", tagHandler.GetPostsByTag)
-
-			// Public config routes (for blog name, description, etc.)
-			public.GET("/config", settingsHandler.GetConfigs)
-
-			// Public comment routes
-			public.POST("/comments", commentHandler.CreateComment)
-			public.GET("/posts/:id/comments", commentHandler.GetCommentsByPostID)
-		}
-
-		// Auth routes (separate from public/admin)
+		// Auth routes (public, for login)
 		api.POST("/auth/login", authHandler.Login)
 
 		// Protected admin routes
 		admin := api.Group("/admin")
 		admin.Use(authHandler.AuthMiddleware())
 		{
-			// Admin post routes (no view count increment)
-			admin.GET("/posts/:id", postHandler.GetAdminPost) // Admin post detail without view count increment
+			// Post routes
+			admin.GET("/posts", postHandler.GetPosts)
+			admin.GET("/posts/:id", postHandler.GetAdminPost)
 			admin.POST("/posts", postHandler.CreatePost)
 			admin.PUT("/posts/:id", postHandler.UpdatePost)
 			admin.DELETE("/posts/:id", postHandler.DeletePost)
 			
-			// Tag management routes (admin only)
+			// Tag management routes
+			admin.GET("/tags", tagHandler.GetAllTags)
 			admin.POST("/tags", tagHandler.CreateTag)
 			admin.PUT("/tags/:id", tagHandler.UpdateTag)
 			admin.DELETE("/tags/:id", tagHandler.DeleteTag)
@@ -105,6 +89,7 @@ func main() {
 			admin.DELETE("/files/:id", fileHandler.DeleteFile)
 			
 			// Settings routes
+			admin.GET("/settings/config", settingsHandler.GetConfigs)
 			admin.PUT("/settings/config", settingsHandler.UpdateConfigs)
 			admin.PUT("/settings/password", settingsHandler.UpdatePassword)
 		}

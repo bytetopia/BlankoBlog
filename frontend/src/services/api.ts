@@ -211,15 +211,10 @@ export const authAPI = {
 // Posts API
 export const postsAPI = {
   getPosts: (page = 1, limit = 10, published = true) =>
-    api.get<PaginatedPostsResponse>('/public/posts', {
+    api.get<PaginatedPostsResponse>('/admin/posts', {
       params: { page, limit, published },
     }),
   
-  // Public post endpoint with view count increment
-  getPublicPost: (idOrSlug: string | number) =>
-    api.get<BlogPost>(`/public/posts/${idOrSlug}`),
-  
-  // Admin post endpoint without view count increment
   getAdminPost: (idOrSlug: string | number) =>
     api.get<BlogPost>(`/admin/posts/${idOrSlug}`),
   
@@ -236,7 +231,7 @@ export const postsAPI = {
 // Settings API
 export const settingsAPI = {
   getConfig: () =>
-    api.get<Config>('/public/config'),
+    api.get<Config>('/admin/settings/config'),
 
   updateConfig: (data: UpdateConfigRequest) =>
     api.put('/admin/settings/config', data),
@@ -248,18 +243,7 @@ export const settingsAPI = {
 // Tags API
 export const tagsAPI = {
   getAllTags: () =>
-    api.get<{ tags: Tag[] }>('/public/tags'),
-
-  getAllTagsWithPostCount: () =>
-    api.get<{ tags: TagWithPostCount[] }>('/public/tags/with-counts'),
-
-  getTag: (id: number) =>
-    api.get<{ tag: Tag }>(`/public/tags/${id}`),
-
-  getPostsByTag: (tagId: number, page = 1, limit = 10, published = true) =>
-    api.get<PaginatedPostsResponse>(`/public/tags/${tagId}/posts`, {
-      params: { page, limit, published },
-    }),
+    api.get<{ tags: Tag[] }>('/admin/tags'),
 
   createTag: (data: CreateTagRequest) =>
     api.post<{ tag: Tag }>('/admin/tags', data),
@@ -273,13 +257,6 @@ export const tagsAPI = {
 
 // Comments API
 export const commentsAPI = {
-  // Public endpoints
-  createComment: (data: CreateCommentRequest) =>
-    api.post<{ message: string; comment: Comment }>('/public/comments', data),
-
-  getCommentsByPostId: (postId: number) =>
-    api.get<{ comments: Comment[] }>(`/public/posts/${postId}/comments`),
-
   // Admin endpoints
   getAllCommentsForAdmin: (page = 1, limit = 20, status?: string) =>
     api.get<{ 

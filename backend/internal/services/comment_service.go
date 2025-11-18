@@ -16,40 +16,6 @@ func NewCommentService(db *gorm.DB) *CommentService {
 	return &CommentService{db: db}
 }
 
-// CreateComment creates a new comment
-func (s *CommentService) CreateComment(comment *models.Comment) error {
-	// Validate that the post exists and is published
-	var post models.Post
-	if err := s.db.Where("id = ? AND published = ?", comment.PostID, true).First(&post).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return fmt.Errorf("post with ID %d not found or not published", comment.PostID)
-		}
-		return fmt.Errorf("failed to validate post: %w", err)
-	}
-
-	// Set default status to pending
-	if comment.Status == "" {
-		comment.Status = "pending"
-	}
-
-	if err := s.db.Create(comment).Error; err != nil {
-		return fmt.Errorf("failed to create comment: %w", err)
-	}
-
-	return nil
-}
-
-// GetCommentsByPostID retrieves approved comments for a specific post
-func (s *CommentService) GetCommentsByPostID(postID uint) ([]models.Comment, error) {
-	var comments []models.Comment
-	if err := s.db.Where("post_id = ? AND status = ?", postID, "approved").
-		Order("created_at ASC").
-		Find(&comments).Error; err != nil {
-		return nil, fmt.Errorf("failed to fetch comments for post %d: %w", postID, err)
-	}
-	return comments, nil
-}
-
 // GetAllCommentsForAdmin retrieves all comments for admin management with post titles
 func (s *CommentService) GetAllCommentsForAdmin(page, limit int, status string) ([]models.Comment, int64, error) {
 	var comments []models.Comment
