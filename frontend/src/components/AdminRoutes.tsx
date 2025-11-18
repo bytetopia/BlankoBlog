@@ -13,15 +13,15 @@ import AdminFileEditorPage from '../pages/admin/AdminFileEditorPage'
 function AdminRoutes() {
   return (
     <Routes>
-      <Route path="/admin" element={<AdminDashboardPage />} />
-      <Route path="/admin/posts" element={<AdminPostsPage />} />
-      <Route path="/admin/posts/new" element={<AdminPostEditorPage />} />
-      <Route path="/admin/posts/:id" element={<AdminPostEditorPage />} />
-      <Route path="/admin/tags" element={<AdminTagsPage />} />
-      <Route path="/admin/comments" element={<AdminCommentsPage />} />
-      <Route path="/admin/files" element={<AdminFilesPage />} />
-      <Route path="/admin/files/:id" element={<AdminFileEditorPage />} />
-      <Route path="/admin/settings" element={<AdminSettingsPage />} />
+      <Route path="/" element={<AdminDashboardPage />} />
+      <Route path="/posts" element={<AdminPostsPage />} />
+      <Route path="/posts/new" element={<AdminPostEditorPage />} />
+      <Route path="/posts/:id" element={<AdminPostEditorPage />} />
+      <Route path="/tags" element={<AdminTagsPage />} />
+      <Route path="/comments" element={<AdminCommentsPage />} />
+      <Route path="/files" element={<AdminFilesPage />} />
+      <Route path="/files/:id" element={<AdminFileEditorPage />} />
+      <Route path="/settings" element={<AdminSettingsPage />} />
     </Routes>
   )
 }

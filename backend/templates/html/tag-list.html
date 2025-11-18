@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+    <title>{{if .Tag}}Posts tagged "{{.Tag.Name}}"{{else}}All Tags{{end}} - {{.BlogName}}</title>
+    <link rel="canonical" href="{{.BaseURL}}/tags{{if .Tag}}/{{.Tag.ID}}/posts{{end}}">
+    <meta name="description" content="{{if .Tag}}View all posts tagged with {{.Tag.Name}}{{else}}Browse all tags{{end}}">
+    <link rel="alternate" type="application/rss+xml" title="{{.BlogName}} RSS Feed" href="{{.BaseURL}}/feed">
+    <link rel="stylesheet" href="/static/css/post-style.css">
+</head>
+<body class="home">
+<header>
+</header>
+<main>
+    {{if .Tag}}
+    <h3 style="margin-bottom:0">Posts tagged "{{.Tag.Name}}"</h3>
+    <ul class="blog-posts">
+        {{range .Posts}}
+        <li>
+            <span>
+                <i>
+                    <time datetime="{{.CreatedAt}}">{{.FormattedDate}}</time>
+                </i>
+            </span>
+            <a href="/posts/{{.Slug}}">{{.Title}}</a>
+        </li>
+        {{else}}
+        <p>No posts found for this tag.</p>
+        {{end}}
+    </ul>
+    
+    {{if gt .Pagination.TotalPages 1}}
+    <div class="post-pagination">
+        <ol class="page-navigator">
+            {{if gt .Pagination.Page 1}}
+            <li><a href="/tags/{{.Tag.ID}}/posts?page={{.Pagination.PrevPage}}">&nbsp;←&nbsp;</a></li>
+            {{end}}
+            
+            {{range .Pagination.Pages}}
+            {{if eq . $.Pagination.Page}}
+            <li class="current"><a href="/tags/{{$.Tag.ID}}/posts?page={{.}}">{{.}}</a></li>
+            {{else}}
+            <li><a href="/tags/{{$.Tag.ID}}/posts?page={{.}}">{{.}}</a></li>
+            {{end}}
+            {{end}}
+            
+            {{if lt .Pagination.Page .Pagination.TotalPages}}
+            <li class="next"><a href="/tags/{{.Tag.ID}}/posts?page={{.Pagination.NextPage}}">&nbsp;→&nbsp;</a></li>
+            {{end}}
+        </ol>
+    </div>
+    {{end}}
+    {{else}}
+    <h3 style="margin-bottom:20px">All Tags</h3>
+    {{if .Tags}}
+    <div class="tags">
+        {{range .Tags}}
+        <a href="/tags/{{.ID}}/posts" style="background-color: {{.Color}}; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; margin: 4px; display: inline-block;">
+            {{.Name}} ({{.PostCount}})
+        </a>
+        {{end}}
+    </div>
+    {{else}}
+    <p>No tags found.</p>
+    {{end}}
+    {{end}}
+</main>
+
+<footer style="margin:50px 0px">
+    <span id="footer-directive">
+        <nav>
+            <a href="/">Home</a>
+            <a href="/tags">Tags</a>
+        </nav>
+    </span>
+    <span>
+        &copy; {{.Year}} <a href="/">{{.BlogName}}</a>
+    </span>
+</footer>
+</body>
+</html>

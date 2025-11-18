@@ -42,27 +42,27 @@ const AdminNavbar: React.FC = () => {
   const navItems = [
     {
       label: 'Posts',
-      path: '/admin/posts',
+      path: '/posts',
       icon: <Article />,
     },
     {
       label: 'Tags',
-      path: '/admin/tags',
+      path: '/tags',
       icon: <LocalOffer />,
     },
     {
       label: 'Comments',
-      path: '/admin/comments',
+      path: '/comments',
       icon: <Comment />,
     },
     {
       label: 'Files',
-      path: '/admin/files',
+      path: '/files',
       icon: <AttachFile />,
     },
     {
       label: 'Settings',
-      path: '/admin/settings',
+      path: '/settings',
       icon: <Settings />,
     },
   ]
@@ -73,7 +73,7 @@ const AdminNavbar: React.FC = () => {
   }
 
   const handleLogoClick = () => {
-    navigate('/admin')
+    navigate('/')
     setMobileMenuOpen(false)
   }
 
@@ -141,7 +141,7 @@ const AdminNavbar: React.FC = () => {
               <Button
                 color="inherit"
                 startIcon={<Home />}
-                onClick={() => navigate('/')}
+                onClick={() => window.open('/', '_blank')}
                 variant="outlined"
                 sx={{ 
                   borderColor: 'rgba(255, 255, 255, 0.3)',
@@ -205,7 +205,7 @@ const AdminNavbar: React.FC = () => {
         <Divider />
         <List>
           <ListItem disablePadding>
-            <ListItemButton onClick={() => handleNavigate('/')}>
+            <ListItemButton onClick={() => { window.open('/', '_blank'); setMobileMenuOpen(false); }}>
               <ListItemIcon>
                 <Home />
               </ListItemIcon>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+    <title>{{.Post.Title}} - {{.BlogName}}</title>
+    <link rel="canonical" href="{{.BaseURL}}/posts/{{.Post.Slug}}">
+    <meta name="description" content="{{.Post.Summary}}">
+    <link rel="alternate" type="application/rss+xml" title="{{.BlogName}} RSS Feed" href="{{.BaseURL}}/feed">
+    <link rel="stylesheet" href="/static/css/post-style.css">
+</head>
+<body class="home">
+<header>
+</header>
+<main>
+    <h1><a href="/">{{.Post.Title}}</a></h1>
+    <p>
+        <i>
+            <time datetime="{{.Post.CreatedAt}}">{{.Post.FormattedDate}}</time>
+            {{if .Post.Tags}}
+            · Tags: 
+            {{range $index, $tag := .Post.Tags}}{{if $index}}, {{end}}<a href="/tags/{{$tag.ID}}/posts">{{$tag.Name}}</a>{{end}}
+            {{end}}
+        </i>
+        <i>
+            · {{.Post.ViewCount}} views
+        </i>
+    </p>
+    <article>
+        {{.Post.ContentHTML}}
+    </article>
+    {{if .Post.Tags}}
+    <p class="tags">
+        {{range .Post.Tags}}
+        <a href="/tags/{{.ID}}/posts" style="background-color: {{.Color}}; color: white; padding: 2px 8px; border-radius: 3px; text-decoration: none;">{{.Name}}</a>
+        {{end}}
+    </p>
+    {{end}}
+    <br/>
+    
+    <hr>
+    <h3>Comments</h3>
+    
+    <div id="comments-section" class="comment-container">
+        <div id="comments" class="clearfix">
+            {{if .Comments}}
+            <ul class="comment-list">
+                {{range .Comments}}
+                <li class="comment-body">
+                    <div class="comment-header">
+                        <img class="avatar" src="https://www.gravatar.com/avatar/{{.EmailHash}}?s=50&d=mp" alt="{{.Name}}">
+                        <span class="comment-author">{{.Name}}</span>
+                    </div>
+                    <div class="comment-content">
+                        <p>{{.Content}}</p>
+                    </div>
+                    <div class="comment-meta">
+                        <time datetime="{{.CreatedAt}}">{{.FormattedDate}}</time>
+                    </div>
+                </li>
+                {{end}}
+            </ul>
+            {{else}}
+            <p class="response">No comments yet. Be the first to comment!</p>
+            {{end}}
+        </div>
+        
+        <form method="post" action="/posts/{{.Post.Slug}}/comments" id="comment-form" class="comment-form" role="form">
+            <input type="text" name="name" class="form-control" placeholder="Your name *" required maxlength="100">
+            <input type="email" name="email" class="form-control" placeholder="Your email (optional)" maxlength="255">
+            <textarea name="content" id="textarea" class="form-control" placeholder="Leave a comment..." required maxlength="2000"></textarea>
+            <button type="submit" class="submit">Post Comment</button>
+        </form>
+    </div>
+    <br/>
+</main>
+
+<footer style="margin:50px 0px">
+    <span id="footer-directive">
+        <nav>
+            <a href="/">Home</a>
+            <a href="/tags">Tags</a>
+        </nav>
+    </span>
+    <span>
+        &copy; {{.Year}} <a href="/">{{.BlogName}}</a>
+    </span>
+</footer>
+</body>
+</html>

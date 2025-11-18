@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"strings"
 
 	"github.com/bytetopia/BlankoBlog/backend/internal/database"
 	"github.com/bytetopia/BlankoBlog/backend/internal/handlers"
@@ -50,6 +49,7 @@ func main() {
 	commentHandler := handlers.NewCommentHandler(commentService)
 	rssHandler := handlers.NewRSSHandler(rssService)
 	fileHandler := handlers.NewFileHandler(db)
+	templateHandler := handlers.NewTemplateHandler(db, configService)
 
 	// API routes
 	api := r.Group("/api")
@@ -119,24 +119,33 @@ func main() {
 	// Serve uploaded files
 	r.GET("/uploads/*filepath", fileHandler.ServeFile)
 
-	// Serve static files (frontend)
+	// Public HTML template routes (for SEO-friendly pages)
+	r.GET("/", templateHandler.RenderPostList)
+	r.GET("/posts/:slug", templateHandler.RenderPostDetail)
+	r.POST("/posts/:slug/comments", templateHandler.HandleCommentSubmit)
+	r.GET("/tags", templateHandler.RenderTagList)
+	r.GET("/tags/:id/posts", templateHandler.RenderTagPosts)
+
+	// Serve static files (CSS, JS, images)
 	r.Static("/static", "./static")
 	r.Static("/assets", "./static/assets")
-	r.StaticFile("/", "./static/index.html")
+	
+	// Admin routes - serve React SPA
+	r.GET("/admin", func(c *gin.Context) {
+		c.File("./static/index.html")
+	})
+	r.GET("/admin/*path", func(c *gin.Context) {
+		c.File("./static/index.html")
+	})
 	
 	// Handle favicon requests gracefully
 	r.GET("/favicon.ico", func(c *gin.Context) {
 		c.File("./static/vite.svg")
 	})
 	
-	// Serve index.html for any non-API routes (SPA routing)
+	// NoRoute handler - return 404 for unknown routes
 	r.NoRoute(func(c *gin.Context) {
-		// Skip API routes
-		if !strings.HasPrefix(c.Request.URL.Path, "/api") && !strings.HasPrefix(c.Request.URL.Path, "/health") {
-			c.File("./static/index.html")
-		} else {
-			c.JSON(404, gin.H{"error": "Not found"})
-		}
+		c.JSON(404, gin.H{"error": "Not found"})
 	})
 
 	// Health check

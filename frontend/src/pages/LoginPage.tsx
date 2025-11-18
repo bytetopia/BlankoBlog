@@ -24,7 +24,7 @@ const LoginPage: React.FC = () => {
   // Redirect if already authenticated
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate('/admin')
+      navigate('/')
     }
   }, [isAuthenticated, navigate])
 
@@ -41,7 +41,7 @@ const LoginPage: React.FC = () => {
       setError('')
       
       await login({ username, password })
-      navigate('/admin')
+      navigate('/')
     } catch (err: any) {
       if (err.response?.status === 401) {
         setError('Invalid username or password')
