@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Language}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
@@ -23,7 +23,7 @@
         <time datetime="{{.CreatedAt}}">{{.FormattedDate}}</time>
     </div>
     {{else}}
-    <p>No posts found.</p>
+    <p>{{.T.NoPostsFound}}</p>
     {{end}}
 
     {{if gt .Pagination.TotalPages 1}}
@@ -52,9 +52,9 @@
 <footer style="margin:50px 0px">
     <span id="footer-directive">
         <nav>
-            <a href="/">Home</a>
-            <a href="/tags">Tags</a>
-            <a href="/feed">RSS</a>
+            <a href="/">{{.T.Home}}</a>
+            <a href="/tags">{{.T.Tags}}</a>
+            <a href="/feed">{{.T.RSS}}</a>
         </nav>
     </span>
     <span>

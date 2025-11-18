@@ -9,6 +9,11 @@ import {
   Button,
   Alert,
   Snackbar,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  FormHelperText,
 } from '@mui/material'
 import { Save, Lock, Settings as SettingsIcon } from '@mui/icons-material'
 import { useNavigate } from 'react-router-dom'
@@ -118,6 +123,7 @@ const AdminSettingsPage: React.FC = () => {
           blog_description: config.blog_description || '',
           font_family: config.font_family || '',
           font_url: config.font_url || '',
+          language: config.language || 'en',
         }
       }
       
@@ -223,6 +229,20 @@ const AdminSettingsPage: React.FC = () => {
                   onChange={(e) => handleConfigChange('blog_description', e.target.value)}
                   helperText="A brief description of your blog"
                 />
+                <FormControl fullWidth>
+                  <InputLabel id="language-label">Visitor Page Language</InputLabel>
+                  <Select
+                    labelId="language-label"
+                    id="language-select"
+                    value={config.language || 'en'}
+                    label="Visitor Page Language"
+                    onChange={(e) => handleConfigChange('language', e.target.value)}
+                  >
+                    <MenuItem value="en">English</MenuItem>
+                    <MenuItem value="zh-CN">简体中文 (Simplified Chinese)</MenuItem>
+                  </Select>
+                  <FormHelperText>Language for visitor-facing pages (posts, tags, comments)</FormHelperText>
+                </FormControl>
                 <Button
                   variant="contained"
                   startIcon={<Save />}

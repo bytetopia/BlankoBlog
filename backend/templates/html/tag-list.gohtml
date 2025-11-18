@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Language}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
-    <title>{{if .Tag}}Posts tagged "{{.Tag.Name}}"{{else}}All Tags{{end}} - {{.BlogName}}</title>
+    <title>{{if .Tag}}{{.T.PostsTagged}} "{{.Tag.Name}}"{{else}}{{.T.AllTags}}{{end}} - {{.BlogName}}</title>
     <link rel="canonical" href="{{.BaseURL}}/tags{{if .Tag}}/{{.Tag.ID}}/posts{{end}}">
-    <meta name="description" content="{{if .Tag}}View all posts tagged with {{.Tag.Name}}{{else}}Browse all tags{{end}}">
+    <meta name="description" content="{{if .Tag}}{{.T.ViewAllPostsTagged}} {{.Tag.Name}}{{else}}{{.T.BrowseAllTags}}{{end}}">
     <link rel="alternate" type="application/rss+xml" title="{{.BlogName}} RSS Feed" href="{{.BaseURL}}/feed">
     <link rel="stylesheet" href="/static/post-assets/post-style.css">
 </head>
@@ -14,7 +14,7 @@
 </header>
 <main>
     {{if .Tag}}
-    <h3 style="margin-bottom:0">Posts tagged "{{.Tag.Name}}"</h3>
+    <h3 style="margin-bottom:0">{{.T.PostsTagged}} "{{.Tag.Name}}"</h3>
     <ul class="blog-posts">
         {{range .Posts}}
         <li>
@@ -26,7 +26,7 @@
             &nbsp;&nbsp;&nbsp;<a href="/posts/{{.Slug}}">{{.Title}}</a>
         </li>
         {{else}}
-        <p>No posts found for this tag.</p>
+        <p>{{.T.NoPostsForTag}}</p>
         {{end}}
     </ul>
     
@@ -52,7 +52,7 @@
     </div>
     {{end}}
     {{else}}
-    <h3 style="margin-bottom:20px">All Tags</h3>
+    <h3 style="margin-bottom:20px">{{.T.AllTags}}</h3>
     {{if .Tags}}
     <div class="tags">
         {{range .Tags}}
@@ -62,7 +62,7 @@
         {{end}}
     </div>
     {{else}}
-    <p>No tags found.</p>
+    <p>{{.T.NoTagsFound}}</p>
     {{end}}
     {{end}}
 </main>
@@ -70,9 +70,9 @@
 <footer style="margin:50px 0px">
     <span id="footer-directive">
         <nav>
-            <a href="/">Home</a>
-            <a href="/tags">Tags</a>
-            <a href="/feed">RSS</a>
+            <a href="/">{{.T.Home}}</a>
+            <a href="/tags">{{.T.Tags}}</a>
+            <a href="/feed">{{.T.RSS}}</a>
         </nav>
     </span>
     <span>

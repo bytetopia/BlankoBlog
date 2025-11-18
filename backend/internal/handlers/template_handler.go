@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bytetopia/BlankoBlog/backend/internal/i18n"
 	"github.com/bytetopia/BlankoBlog/backend/internal/models"
 	"github.com/bytetopia/BlankoBlog/backend/internal/services"
 	"github.com/gin-gonic/gin"
@@ -48,6 +49,8 @@ type PostListData struct {
 	Year            int
 	Posts           []PostData
 	Pagination      PaginationData
+	T               i18n.Translations
+	Language        string
 }
 
 // PostDetailData represents data for the post detail template
@@ -58,6 +61,8 @@ type PostDetailData struct {
 	Year            int
 	Post            PostData
 	Comments        []CommentData
+	T               i18n.Translations
+	Language        string
 }
 
 // TagListData represents data for the tag list template (both tag list and tag posts)
@@ -70,6 +75,8 @@ type TagListData struct {
 	Tags            []TagWithCountData
 	Posts           []PostData
 	Pagination      PaginationData
+	T               i18n.Translations
+	Language        string
 }
 
 // PostData represents a single post for templates
@@ -148,9 +155,27 @@ func (h *TemplateHandler) getBaseData(c *gin.Context) (string, string, string, e
 	return blogName, blogDescription, baseURL, nil
 }
 
+// getTranslations gets the translations based on language config
+func (h *TemplateHandler) getTranslations() i18n.Translations {
+	lang, err := h.configService.GetConfig("language")
+	if err != nil || lang == "" {
+		lang = "en" // Default to English
+	}
+	return i18n.GetTranslations(lang)
+}
+
+// getLanguage gets the language code from config
+func (h *TemplateHandler) getLanguage() string {
+	lang, err := h.configService.GetConfig("language")
+	if err != nil || lang == "" {
+		lang = "en" // Default to English
+	}
+	return lang
+}
+
 // formatDate formats a time to a readable string
 func formatDate(t time.Time) string {
-	return t.Format("January 2, 2006")
+	return t.Format("2006-01-02")
 }
 
 // convertPostToData converts a Post model to PostData
@@ -263,6 +288,8 @@ func (h *TemplateHandler) RenderPostList(c *gin.Context) {
 		Year:            time.Now().Year(),
 		Posts:           postData,
 		Pagination:      pagination,
+		T:               h.getTranslations(),
+		Language:        h.getLanguage(),
 	}
 
 	if err := h.templates.ExecuteTemplate(c.Writer, "post-list.gohtml", data); err != nil {
@@ -316,6 +343,8 @@ func (h *TemplateHandler) RenderPostDetail(c *gin.Context) {
 		Year:            time.Now().Year(),
 		Post:            convertPostToData(post),
 		Comments:        commentData,
+		T:               h.getTranslations(),
+		Language:        h.getLanguage(),
 	}
 
 	if err := h.templates.ExecuteTemplate(c.Writer, "post-detail.gohtml", data); err != nil {
@@ -355,6 +384,8 @@ func (h *TemplateHandler) RenderTagList(c *gin.Context) {
 		BaseURL:         baseURL,
 		Year:            time.Now().Year(),
 		Tags:            tagData,
+		T:               h.getTranslations(),
+		Language:        h.getLanguage(),
 	}
 
 	if err := h.templates.ExecuteTemplate(c.Writer, "tag-list.gohtml", data); err != nil {
@@ -430,6 +461,8 @@ func (h *TemplateHandler) RenderTagPosts(c *gin.Context) {
 		Tag:             tagDataSingle,
 		Posts:           postData,
 		Pagination:      pagination,
+		T:               h.getTranslations(),
+		Language:        h.getLanguage(),
 	}
 
 	if err := h.templates.ExecuteTemplate(c.Writer, "tag-list.gohtml", data); err != nil {

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{.Language}}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
@@ -32,7 +32,7 @@
             {{end}}
         </i>
         <i>
-            · {{.Post.ViewCount}} views
+            · {{.Post.ViewCount}} {{.T.Views}}
         </i>
     </p>
     <article>
@@ -41,7 +41,7 @@
     <br/>
     
     <hr>
-    <h3>Comments</h3>
+    <h3>{{.T.Comments}}</h3>
     
     <div id="comments-section" class="comment-container">
         <div id="comments" class="clearfix">
@@ -63,16 +63,16 @@
                 {{end}}
             </ul>
             {{else}}
-            <p class="response">No comments yet. Be the first to comment!</p>
+            <p class="response">{{.T.NoCommentsYet}}</p>
             {{end}}
         </div>
         
         <form method="post" action="/posts/{{.Post.Slug}}/comments" id="comment-form" class="comment-form" role="form">
-            <input type="text" name="name" class="form-control" placeholder="Your name *" required maxlength="100">
-            <input type="email" name="email" class="form-control" placeholder="Your email (optional)" maxlength="255">
-            <textarea name="content" id="textarea" class="form-control" placeholder="Leave a comment..." required maxlength="2000"></textarea>
-            <p class="comment-help-text" style="font-size: 0.8rem; margin: 5px 0;">Comment may need to be reviewed before it appears on the website.</p>
-            <button type="submit" class="submit">Post Comment</button>
+            <input type="text" name="name" class="form-control" placeholder="{{.T.YourName}}" required maxlength="100">
+            <input type="email" name="email" class="form-control" placeholder="{{.T.YourEmail}}" maxlength="255">
+            <textarea name="content" id="textarea" class="form-control" placeholder="{{.T.LeaveComment}}" required maxlength="2000"></textarea>
+            <p class="comment-help-text" style="font-size: 0.8rem; margin: 5px 0;">{{.T.CommentHelp}}</p>
+            <button type="submit" class="submit">{{.T.PostComment}}</button>
         </form>
     </div>
     <br/>
@@ -81,9 +81,9 @@
 <footer style="margin:50px 0px">
     <span id="footer-directive">
         <nav>
-            <a href="/">Home</a>
-            <a href="/tags">Tags</a>
-            <a href="/feed">RSS</a>
+            <a href="/">{{.T.Home}}</a>
+            <a href="/tags">{{.T.Tags}}</a>
+            <a href="/feed">{{.T.RSS}}</a>
         </nav>
     </span>
     <span>

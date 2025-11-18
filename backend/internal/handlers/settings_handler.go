@@ -58,6 +58,7 @@ func (h *SettingsHandler) UpdateConfigs(c *gin.Context) {
 		"blog_description": true,
 		"font_family":      true,
 		"font_url":         true,
+		"language":         true,
 	}
 
 	for key := range req.Configs {
