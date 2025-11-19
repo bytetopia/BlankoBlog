@@ -90,22 +90,29 @@ func (h *SettingsHandler) UpdatePassword(c *gin.Context) {
 		return
 	}
 
-	// Get user ID from context (set by auth middleware)
-	userID, exists := c.Get("user_id")
+	// Get user from context (set by auth middleware)
+	userInterface, exists := c.Get("user")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 
-	// Get user from database
-	var user models.User
-	if err := h.db.First(&user, userID).Error; err != nil {
+	// Type assert to get the user
+	user, ok := userInterface.(*models.User)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user from context"})
+		return
+	}
+
+	// Fetch the full user from database to ensure we have the latest password
+	var dbUser models.User
+	if err := h.db.First(&dbUser, user.ID).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 		return
 	}
 
 	// Verify current password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.CurrentPassword)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(dbUser.Password), []byte(req.CurrentPassword)); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Current password is incorrect"})
 		return
 	}
@@ -118,8 +125,8 @@ func (h *SettingsHandler) UpdatePassword(c *gin.Context) {
 	}
 
 	// Update password in database
-	user.Password = string(hashedPassword)
-	if err := h.db.Save(&user).Error; err != nil {
+	dbUser.Password = string(hashedPassword)
+	if err := h.db.Save(&dbUser).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update password"})
 		return
 	}
