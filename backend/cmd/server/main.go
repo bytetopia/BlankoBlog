@@ -130,7 +130,18 @@ func main() {
 	
 	// NoRoute handler - return 404 for unknown routes
 	r.NoRoute(func(c *gin.Context) {
-		c.JSON(404, gin.H{"error": "Not found"})
+		// Check if it's an API request or admin path
+		path := c.Request.URL.Path
+		if len(path) >= 4 && path[:4] == "/api" {
+			c.JSON(404, gin.H{"error": "Not found"})
+			return
+		}
+		if len(path) >= 6 && path[:6] == "/admin" {
+			c.File("./static/index.html")
+			return
+		}
+		// For visitor pages, render the 404 template
+		templateHandler.Render404(c)
 	})
 
 	// Health check

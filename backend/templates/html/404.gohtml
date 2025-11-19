@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="{{.Language}}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
+    <title>Not Found - {{.BlogName}}</title>
+    <link rel="stylesheet" href="/static/post-assets/post-style.css">
+</head>
+<body class="home">
+<header>
+</header>
+<main>
+    <h3 style="margin-bottom:0">{{.T.PageNotFound}}</h3>
+    <a href="/">&lt; {{.T.BackToHome}}</a>
+</main>
+
+<footer>
+    <span id="footer-directive">
+        <nav>
+            {{range .FooterLinks}}
+            <a href="{{.URL}}">{{.Text}}</a>
+            {{end}}
+        </nav>
+    </span>
+    <span>
+        &copy; {{.Year}} <a href="/">{{.BlogName}}</a>
+    </span>
+</footer>
+</body>
+</html>

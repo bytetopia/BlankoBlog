@@ -21,6 +21,8 @@ type Translations struct {
 	NoTagsFound                 string
 	ViewAllPostsTagged          string
 	BrowseAllTags               string
+	PageNotFound                string
+	BackToHome                  string
 }
 
 // Languages contains all supported languages
@@ -45,6 +47,8 @@ var Languages = map[string]Translations{
 		NoTagsFound:                 "No tags found.",
 		ViewAllPostsTagged:          "View all posts tagged with",
 		BrowseAllTags:               "Browse all tags",
+		PageNotFound:                "Page Not Found",
+		BackToHome:                  "Back to Home",
 	},
 	"zh-CN": {
 		NoPostsFound:                "未找到文章。",
@@ -66,6 +70,8 @@ var Languages = map[string]Translations{
 		NoTagsFound:                 "未找到标签。",
 		ViewAllPostsTagged:          "查看所有标签为",
 		BrowseAllTags:               "浏览所有标签",
+		PageNotFound:                "页面未找到",
+		BackToHome:                  "返回首页",
 	},
 }
 

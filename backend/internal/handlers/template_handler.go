@@ -82,6 +82,15 @@ type TagListData struct {
 	Language        string
 }
 
+// NotFoundData represents data for the 404 page template
+type NotFoundData struct {
+	BlogName    string
+	Year        int
+	FooterLinks []models.FooterLink
+	T           i18n.Translations
+	Language    string
+}
+
 // PostData represents a single post for templates
 type PostData struct {
 	ID            uint
@@ -311,7 +320,7 @@ func (h *TemplateHandler) RenderPostDetail(c *gin.Context) {
 
 	var post models.Post
 	if err := h.db.Where("slug = ? AND published = ?", slug, true).Preload("Tags").First(&post).Error; err != nil {
-		c.String(http.StatusNotFound, "Post not found")
+		h.Render404(c)
 		return
 	}
 
@@ -426,7 +435,7 @@ func (h *TemplateHandler) RenderTagPosts(c *gin.Context) {
 	// Get tag
 	var tag models.Tag
 	if err := h.db.First(&tag, tagID).Error; err != nil {
-		c.String(http.StatusNotFound, "Tag not found")
+		h.Render404(c)
 		return
 	}
 
@@ -487,6 +496,29 @@ func (h *TemplateHandler) RenderTagPosts(c *gin.Context) {
 	if err := h.templates.ExecuteTemplate(c.Writer, "tag-list.gohtml", data); err != nil {
 		log.Printf("Error rendering template: %v", err)
 		c.String(http.StatusInternalServerError, "Error rendering page")
+	}
+}
+
+// Render404 renders the 404 not found page
+func (h *TemplateHandler) Render404(c *gin.Context) {
+	// Get base data
+	blogName, _, _, _ := h.getBaseData(c)
+
+	// Get footer links
+	footerLinks, _ := h.configService.GetFooterLinks()
+
+	data := NotFoundData{
+		BlogName:    blogName,
+		Year:        time.Now().Year(),
+		FooterLinks: footerLinks,
+		T:           h.getTranslations(),
+		Language:    h.getLanguage(),
+	}
+
+	c.Status(http.StatusNotFound)
+	if err := h.templates.ExecuteTemplate(c.Writer, "404.gohtml", data); err != nil {
+		log.Printf("Error rendering 404 template: %v", err)
+		c.String(http.StatusNotFound, "404 - Page not found")
 	}
 }
 
