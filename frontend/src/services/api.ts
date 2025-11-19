@@ -217,8 +217,8 @@ export const postsAPI = {
       params: { page, limit, published },
     }),
   
-  getAdminPost: (idOrSlug: string | number) =>
-    api.get<BlogPost>(`/admin/posts/${idOrSlug}`),
+  getAdminPost: (id: number) =>
+    api.get<BlogPost>(`/admin/posts/${id}`),
   
   createPost: (data: CreatePostRequest) =>
     api.post<BlogPost>('/admin/posts', data),

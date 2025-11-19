@@ -51,60 +51,15 @@ func (h *PostHandler) GetPosts(c *gin.Context) {
 	})
 }
 
-// GetPost handles GET /api/posts/:id
-func (h *PostHandler) GetPost(c *gin.Context) {
-	idParam := c.Param("id")
-
-	// Try to parse as ID first, then as slug
-	if id, err := strconv.ParseUint(idParam, 10, 32); err == nil {
-		post, err := h.postService.GetPostByID(uint(id), true)
-		if err != nil {
-			if err == gorm.ErrRecordNotFound {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-				return
-			}
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch post"})
-			return
-		}
-		c.JSON(http.StatusOK, post.ToResponse())
-		return
-	}
-
-	// Try as slug
-	post, err := h.postService.GetPostBySlug(idParam, true)
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch post"})
-		return
-	}
-
-	c.JSON(http.StatusOK, post.ToResponse())
-}
-
-// GetAdminPost handles GET /api/admin/posts/:id (admin only, no view count increment)
+// GetAdminPost handles GET /api/admin/posts/:id (admin only, accepts ID only)
 func (h *PostHandler) GetAdminPost(c *gin.Context) {
-	idParam := c.Param("id")
-
-	// Try to parse as ID first, then as slug
-	if id, err := strconv.ParseUint(idParam, 10, 32); err == nil {
-		post, err := h.postService.GetPostByID(uint(id), false) // Admin can see unpublished posts
-		if err != nil {
-			if err == gorm.ErrRecordNotFound {
-				c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
-				return
-			}
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch post"})
-			return
-		}
-		c.JSON(http.StatusOK, post.ToResponse())
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post ID"})
 		return
 	}
 
-	// Try as slug
-	post, err := h.postService.GetPostBySlug(idParam, false) // Admin can see unpublished posts
+	post, err := h.postService.GetPostByID(uint(id), false) // Admin can see unpublished posts
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
