@@ -56,8 +56,7 @@ func (h *SettingsHandler) UpdateConfigs(c *gin.Context) {
 	allowedKeys := map[string]bool{
 		"blog_name":        true,
 		"blog_description": true,
-		"font_family":      true,
-		"font_url":         true,
+		"custom_css":       true,
 		"language":         true,
 		"footer_links":     true,
 	}

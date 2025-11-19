@@ -9,6 +9,11 @@
     <link rel="alternate" type="application/rss+xml" title="{{.BlogName}} RSS Feed" href="{{.BaseURL}}/feed">
     <link rel="stylesheet" href="/static/post-assets/post-style.css">
     <link rel="stylesheet" href="/static/post-assets/github.min.css">
+    {{if .CustomCSS}}
+    <style>
+        {{.CustomCSS}}
+    </style>
+    {{end}}
     <script src="/static/post-assets/highlight.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', (event) => {

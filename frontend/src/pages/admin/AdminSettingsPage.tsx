@@ -159,8 +159,7 @@ const AdminSettingsPage: React.FC = () => {
         configs: {
           blog_name: config.blog_name || '',
           blog_description: config.blog_description || '',
-          font_family: config.font_family || '',
-          font_url: config.font_url || '',
+          custom_css: config.custom_css || '',
           language: config.language || 'en',
         }
       }
@@ -362,7 +361,7 @@ const AdminSettingsPage: React.FC = () => {
               Appearance Settings
             </Typography>
             <Typography variant="body2" color="text.secondary" gutterBottom sx={{ mb: 3 }}>
-              Customize the visual appearance of your blog for visitors.
+              Customize the visual appearance of your blog for visitors. Add custom CSS to override default styles.
             </Typography>
 
             {configLoading ? (
@@ -371,19 +370,19 @@ const AdminSettingsPage: React.FC = () => {
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <TextField
                   fullWidth
-                  label="Font Family"
-                  value={config.font_family || ''}
-                  onChange={(e) => handleConfigChange('font_family', e.target.value)}
-                  helperText="Font name (e.g., 'Roboto', 'Inter', 'Merriweather'). Leave empty for default."
-                  placeholder="Roboto"
-                />
-                <TextField
-                  fullWidth
-                  label="Google Font URL (Optional)"
-                  value={config.font_url || ''}
-                  onChange={(e) => handleConfigChange('font_url', e.target.value)}
-                  helperText="Google Fonts URL to load web font (e.g., https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap)"
-                  placeholder="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap"
+                  multiline
+                  rows={20}
+                  label="Custom CSS"
+                  value={config.custom_css || ''}
+                  onChange={(e) => handleConfigChange('custom_css', e.target.value)}
+                  helperText="Add your custom CSS here. This will be injected into visitor pages and will override default styles."
+                  placeholder="/* Add your custom CSS here */&#10;body {&#10;  font-family: 'Your Font', serif;&#10;}"
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      fontFamily: 'monospace',
+                      fontSize: '0.9rem',
+                    }
+                  }}
                 />
                 <Button
                   variant="contained"

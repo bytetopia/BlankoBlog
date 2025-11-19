@@ -9,6 +9,11 @@
     <meta name="description" content="{{.BlogDescription}}">
     <link rel="alternate" type="application/rss+xml" title="{{.BlogName}} RSS Feed" href="{{.BaseURL}}/feed">
     <link rel="stylesheet" href="/static/post-assets/post-style.css">
+    {{if .CustomCSS}}
+    <style>
+        {{.CustomCSS}}
+    </style>
+    {{end}}
 </head>
 <body class="home">
 <header>

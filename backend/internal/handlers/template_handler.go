@@ -52,6 +52,7 @@ type PostListData struct {
 	FooterLinks     []models.FooterLink
 	T               i18n.Translations
 	Language        string
+	CustomCSS       template.CSS
 }
 
 // PostDetailData represents data for the post detail template
@@ -65,6 +66,7 @@ type PostDetailData struct {
 	FooterLinks     []models.FooterLink
 	T               i18n.Translations
 	Language        string
+	CustomCSS       template.CSS
 }
 
 // TagListData represents data for the tag list template (both tag list and tag posts)
@@ -80,6 +82,7 @@ type TagListData struct {
 	FooterLinks     []models.FooterLink
 	T               i18n.Translations
 	Language        string
+	CustomCSS       template.CSS
 }
 
 // NotFoundData represents data for the 404 page template
@@ -89,6 +92,7 @@ type NotFoundData struct {
 	FooterLinks []models.FooterLink
 	T           i18n.Translations
 	Language    string
+	CustomCSS   template.CSS
 }
 
 // PostData represents a single post for templates
@@ -183,6 +187,15 @@ func (h *TemplateHandler) getLanguage() string {
 		lang = "en" // Default to English
 	}
 	return lang
+}
+
+// getCustomCSS gets the custom CSS from config
+func (h *TemplateHandler) getCustomCSS() template.CSS {
+	customCSS, err := h.configService.GetConfig("custom_css")
+	if err != nil || customCSS == "" {
+		return template.CSS("")
+	}
+	return template.CSS(customCSS)
 }
 
 // formatDate formats a time to a readable string
@@ -306,6 +319,7 @@ func (h *TemplateHandler) RenderPostList(c *gin.Context) {
 		FooterLinks:     footerLinks,
 		T:               h.getTranslations(),
 		Language:        h.getLanguage(),
+		CustomCSS:       h.getCustomCSS(),
 	}
 
 	if err := h.templates.ExecuteTemplate(c.Writer, "post-list.gohtml", data); err != nil {
@@ -365,6 +379,7 @@ func (h *TemplateHandler) RenderPostDetail(c *gin.Context) {
 		FooterLinks:     footerLinks,
 		T:               h.getTranslations(),
 		Language:        h.getLanguage(),
+		CustomCSS:       h.getCustomCSS(),
 	}
 
 	if err := h.templates.ExecuteTemplate(c.Writer, "post-detail.gohtml", data); err != nil {
@@ -410,6 +425,7 @@ func (h *TemplateHandler) RenderTagList(c *gin.Context) {
 		FooterLinks:     footerLinks,
 		T:               h.getTranslations(),
 		Language:        h.getLanguage(),
+		CustomCSS:       h.getCustomCSS(),
 	}
 
 	if err := h.templates.ExecuteTemplate(c.Writer, "tag-list.gohtml", data); err != nil {
@@ -491,6 +507,7 @@ func (h *TemplateHandler) RenderTagPosts(c *gin.Context) {
 		FooterLinks:     footerLinks,
 		T:               h.getTranslations(),
 		Language:        h.getLanguage(),
+		CustomCSS:       h.getCustomCSS(),
 	}
 
 	if err := h.templates.ExecuteTemplate(c.Writer, "tag-list.gohtml", data); err != nil {
@@ -513,6 +530,7 @@ func (h *TemplateHandler) Render404(c *gin.Context) {
 		FooterLinks: footerLinks,
 		T:           h.getTranslations(),
 		Language:    h.getLanguage(),
+		CustomCSS:   h.getCustomCSS(),
 	}
 
 	c.Status(http.StatusNotFound)

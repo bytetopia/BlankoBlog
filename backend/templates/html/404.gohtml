@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5">
     <title>Not Found - {{.BlogName}}</title>
     <link rel="stylesheet" href="/static/post-assets/post-style.css">
+    {{if .CustomCSS}}
+    <style>
+        {{.CustomCSS}}
+    </style>
+    {{end}}
 </head>
 <body class="home">
 <header>
