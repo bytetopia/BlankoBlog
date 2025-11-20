@@ -20,6 +20,12 @@
             document.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
             });
+            
+            // Make all links in post content open in new tab
+            document.querySelectorAll('article a').forEach((link) => {
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+            });
         });
     </script>
 </head>
