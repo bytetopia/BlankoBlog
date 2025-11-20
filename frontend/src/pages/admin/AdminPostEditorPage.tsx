@@ -41,6 +41,7 @@ const PostEditorPage: React.FC = () => {
   const [rightPanelTab, setRightPanelTab] = useState(0)
   const [postId, setPostId] = useState<number | null>(id && id !== 'new' ? parseInt(id) : null)
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
+  const [attachmentCount, setAttachmentCount] = useState(0)
   const [post, setPost] = useState({
     title: '',
     content: '',
@@ -408,7 +409,22 @@ const PostEditorPage: React.FC = () => {
                 variant="fullWidth"
               >
                 <Tab label="Metadata" />
-                <Tab label="Attachments" />
+                <Tab 
+                  label={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      Attachments
+                      {attachmentCount > 0 && (
+                        <Chip 
+                          label={attachmentCount} 
+                          size="small" 
+                          color="primary"
+                          variant="outlined"
+                          sx={{ height: 20, fontSize: '0.75rem' }}
+                        />
+                      )}
+                    </Box>
+                  } 
+                />
               </Tabs>
             </Box>
 
@@ -547,6 +563,7 @@ const PostEditorPage: React.FC = () => {
                 <Box>
                   <PostFileUploader 
                     postId={postId}
+                    onFilesChange={(files) => setAttachmentCount(files.length)}
                   />
                 </Box>
               )}
