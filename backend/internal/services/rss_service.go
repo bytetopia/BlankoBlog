@@ -92,10 +92,10 @@ func (s *RSSService) GenerateRSSFeed(baseURL string, limit int) (string, error) 
 	for _, post := range posts {
 		item := Item{
 			Title:       html.EscapeString(post.Title),
-			Link:        fmt.Sprintf("%s/posts/%d", baseURL, post.ID),
+			Link:        fmt.Sprintf("%s/posts/%s", baseURL, post.Slug),
 			Description: html.EscapeString(s.generateDescription(post)),
 			PubDate:     post.CreatedAt.Format(time.RFC1123Z),
-			GUID:        fmt.Sprintf("%s/posts/%d", baseURL, post.ID),
+			GUID:        fmt.Sprintf("%s/posts/%s", baseURL, post.Slug),
 		}
 
 		// Add tags as categories
