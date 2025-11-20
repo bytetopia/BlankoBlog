@@ -84,6 +84,19 @@ const PostEditorPage: React.FC = () => {
           setLoading(true)
           const response = await postsAPI.getAdminPost(postId)
           const postData = response.data
+          
+          // Convert created_at to datetime-local format (YYYY-MM-DDTHH:mm)
+          let createdAtLocal = ''
+          if (postData.created_at) {
+            const date = new Date(postData.created_at)
+            const year = date.getFullYear()
+            const month = String(date.getMonth() + 1).padStart(2, '0')
+            const day = String(date.getDate()).padStart(2, '0')
+            const hours = String(date.getHours()).padStart(2, '0')
+            const minutes = String(date.getMinutes()).padStart(2, '0')
+            createdAtLocal = `${year}-${month}-${day}T${hours}:${minutes}`
+          }
+          
           const loadedPost = {
             title: postData.title,
             content: postData.content,
@@ -91,7 +104,7 @@ const PostEditorPage: React.FC = () => {
             slug: postData.slug,
             published: postData.published,
             tags: postData.tags || [],
-            created_at: postData.created_at || '',
+            created_at: createdAtLocal,
           }
           setPost(loadedPost)
           // Store initial state for comparison
@@ -131,6 +144,9 @@ const PostEditorPage: React.FC = () => {
     try {
       setAutoSaving(true)
 
+      // Convert datetime-local format to ISO 8601 for backend
+      let createdAtForBackend = post.created_at ? new Date(post.created_at).toISOString() : undefined
+
       if (postId) {
         // Update existing post
         const updateData: UpdatePostRequest = {
@@ -140,7 +156,7 @@ const PostEditorPage: React.FC = () => {
           slug: post.slug || undefined,
           published: post.published,
           tag_ids: post.tags.map(tag => tag.id),
-          created_at: post.created_at || undefined,
+          created_at: createdAtForBackend,
         }
         await postsAPI.updatePost(postId, updateData)
       } else {
@@ -152,7 +168,7 @@ const PostEditorPage: React.FC = () => {
           slug: post.slug || undefined,
           published: post.published,
           tag_ids: post.tags.map(tag => tag.id),
-          created_at: post.created_at || undefined,
+          created_at: createdAtForBackend,
         }
         const response = await postsAPI.createPost(createData)
         
@@ -201,6 +217,9 @@ const PostEditorPage: React.FC = () => {
       setError('')
       setSuccess('')
 
+      // Convert datetime-local format to ISO 8601 for backend
+      let createdAtForBackend = post.created_at ? new Date(post.created_at).toISOString() : undefined
+
       if (postId) {
         // Update existing post
         const updateData: UpdatePostRequest = {
@@ -210,7 +229,7 @@ const PostEditorPage: React.FC = () => {
           slug: post.slug || undefined,
           published: post.published,
           tag_ids: post.tags.map(tag => tag.id),
-          created_at: post.created_at || undefined,
+          created_at: createdAtForBackend,
         }
         await postsAPI.updatePost(postId, updateData)
         setSuccess('Post updated successfully!')
@@ -225,7 +244,7 @@ const PostEditorPage: React.FC = () => {
           slug: post.slug || undefined,
           published: post.published,
           tag_ids: post.tags.map(tag => tag.id),
-          created_at: post.created_at || undefined,
+          created_at: createdAtForBackend,
         }
         const response = await postsAPI.createPost(createData)
         setSuccess('Post created successfully!')
@@ -470,11 +489,8 @@ const PostEditorPage: React.FC = () => {
                       fullWidth
                       size="small"
                       type="datetime-local"
-                      value={post.created_at ? new Date(post.created_at).toISOString().slice(0, 16) : ''}
-                      onChange={(e) => {
-                        const newDate = e.target.value ? new Date(e.target.value).toISOString() : ''
-                        handleFieldChange('created_at', newDate)
-                      }}
+                      value={post.created_at}
+                      onChange={(e) => handleFieldChange('created_at', e.target.value)}
                       variant="outlined"
                       helperText="Set a custom publish date and time (leave empty for automatic)"
                       InputLabelProps={{
