@@ -418,13 +418,13 @@ const PostEditorPage: React.FC = () => {
             </Box>
 
             {/* Tab Content */}
-            <Box sx={{ flex: 1, overflow: 'auto', p: 3 }}>
+            <Box sx={{ flex: 1, overflow: 'auto', p: 2, pb: 10 }}>
               {/* Metadata Tab */}
               {rightPanelTab === 0 && (
                 <Box>
                   {/* Publish Status */}
-                  <Box sx={{ mb: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                  <Box sx={{ mb: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                       Status
                     </Typography>
                     <FormControlLabel
@@ -450,11 +450,11 @@ const PostEditorPage: React.FC = () => {
                     />
                   </Box>
 
-                  <Divider sx={{ my: 3 }} />
+                  <Divider sx={{ my: 1.5 }} />
 
                   {/* URL Slug */}
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                       URL Slug
                     </Typography>
                     <TextField
@@ -478,11 +478,11 @@ const PostEditorPage: React.FC = () => {
                     </Button>
                   </Box>
 
-                  <Divider sx={{ my: 3 }} />
+                  <Divider sx={{ my: 1.5 }} />
 
                   {/* Publish Time */}
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                       Publish Time
                     </Typography>
                     <TextField
@@ -510,11 +510,11 @@ const PostEditorPage: React.FC = () => {
                     )}
                   </Box>
 
-                  <Divider sx={{ my: 3 }} />
+                  <Divider sx={{ my: 1.5 }} />
 
                   {/* Summary */}
-                  <Box sx={{ mb: 3 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                  <Box sx={{ mb: 2 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                       Summary
                     </Typography>
                     <TextField
@@ -524,17 +524,17 @@ const PostEditorPage: React.FC = () => {
                       onChange={(e) => handleFieldChange('summary', e.target.value)}
                       placeholder="Brief description for previews..."
                       multiline
-                      rows={3}
+                      rows={2}
                       variant="outlined"
                       helperText="Shown in post previews and search results"
                     />
                   </Box>
 
-                  <Divider sx={{ my: 3 }} />
+                  <Divider sx={{ my: 1.5 }} />
 
                   {/* Tags */}
                   <Box>
-                    <Typography variant="subtitle2" sx={{ mb: 1.5, fontWeight: 600 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
                       Tags
                     </Typography>
                     <TagInput

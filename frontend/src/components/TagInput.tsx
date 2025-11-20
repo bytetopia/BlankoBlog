@@ -55,8 +55,13 @@ const TagInput: React.FC<TagInputProps> = ({
 
   // Filter tags based on input
   useEffect(() => {
+    // If no input, show all available tags (excluding selected ones)
     if (!inputValue.trim()) {
-      setFilteredTags([]);
+      const unselected = availableTags.filter(
+        (tag) => !selectedTags.find((selectedTag) => selectedTag.id === tag.id)
+      );
+      setFilteredTags(unselected);
+      setHighlightedIndex(-1);
       return;
     }
 
@@ -209,12 +214,13 @@ const TagInput: React.FC<TagInputProps> = ({
             overflow: 'auto',
           }}
         >
-          <List disablePadding>
+          <List disablePadding dense>
             {filteredTags.map((tag, index) => (
               <ListItem key={tag.id} disablePadding>
                 <ListItemButton
                   selected={index === highlightedIndex}
                   onClick={() => handleSelectTag(tag)}
+                  sx={{ py: 0.5 }}
                 >
                   <ListItemIcon sx={{ minWidth: 32 }}>
                     <CircleIcon
@@ -239,6 +245,7 @@ const TagInput: React.FC<TagInputProps> = ({
                     selected={filteredTags.length === highlightedIndex}
                     onClick={handleCreateTag}
                     disabled={isLoading}
+                    sx={{ py: 0.5 }}
                   >
                     <ListItemIcon sx={{ minWidth: 32 }}>
                       {isLoading ? (
