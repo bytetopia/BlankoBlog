@@ -26,7 +26,7 @@ import MDEditor from '@uiw/react-md-editor'
 import '@uiw/react-md-editor/markdown-editor.css'
 import AdminNavbar from '../../components/AdminNavbar'
 
-const AUTO_SAVE_DELAY = 30000 // 30 seconds after last change
+const AUTO_SAVE_DELAY = 60000 // 1 minute
 
 const PostEditorPage: React.FC = () => {
   const { isAuthenticated } = useAuth()
@@ -51,7 +51,7 @@ const PostEditorPage: React.FC = () => {
     created_at: '',
   })
 
-  const autoSaveTimerRef = useRef<number | null>(null)
+  const autoSaveIntervalRef = useRef<number | null>(null)
   const initialPostRef = useRef<string>('')
 
   const isEditing = Boolean(postId)
@@ -190,25 +190,20 @@ const PostEditorPage: React.FC = () => {
     }
   }, [post, postId, navigate, hasChanges])
 
-  // Trigger auto-save on changes
+  // Set up auto-save interval that runs at fixed interval.
   useEffect(() => {
-    // Clear existing timer
-    if (autoSaveTimerRef.current) {
-      clearTimeout(autoSaveTimerRef.current)
-    }
-
-    // Set new timer
-    autoSaveTimerRef.current = setTimeout(() => {
+    // Start interval
+    autoSaveIntervalRef.current = setInterval(() => {
       performAutoSave()
     }, AUTO_SAVE_DELAY)
 
     // Cleanup on unmount
     return () => {
-      if (autoSaveTimerRef.current) {
-        clearTimeout(autoSaveTimerRef.current)
+      if (autoSaveIntervalRef.current) {
+        clearInterval(autoSaveIntervalRef.current)
       }
     }
-  }, [post, performAutoSave])
+  }, [performAutoSave])
 
   // Manual save function (with user feedback)
   const handleSave = async () => {
