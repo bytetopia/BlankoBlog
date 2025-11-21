@@ -18,6 +18,7 @@ import { ArrowBack, Save, CloudDone, CloudQueue } from '@mui/icons-material'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { useSiteConfig } from '../../hooks/useSiteConfig'
 import { postsAPI } from '../../services/api'
 import type { CreatePostRequest, UpdatePostRequest, Tag } from '../../services/api'
 import TagInput from '../../components/TagInput'
@@ -28,10 +29,49 @@ import AdminNavbar from '../../components/AdminNavbar'
 
 const AUTO_SAVE_DELAY = 60000 // 1 minute
 
+// Helper function to convert UTC ISO string to browser's local datetime-local format (YYYY-MM-DDTHH:mm)
+// This allows the admin to edit in their own timezone
+const utcToLocalDatetime = (utcISOString: string): string => {
+  if (!utcISOString) return ''
+  
+  try {
+    const date = new Date(utcISOString)
+    // Convert to local datetime-local format
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    const hours = String(date.getHours()).padStart(2, '0')
+    const minutes = String(date.getMinutes()).padStart(2, '0')
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`
+  } catch (e) {
+    console.error('Error converting UTC to local datetime:', e)
+    return ''
+  }
+}
+
+// Helper function to convert browser's local datetime-local to UTC ISO string
+// The datetime from the input is in the user's browser timezone
+const localDatetimeToUTC = (localDateTimeString: string): string => {
+  if (!localDateTimeString) return ''
+  
+  try {
+    // The datetime-local input gives us a string in the user's local timezone
+    // JavaScript's Date constructor will interpret this as local time
+    const localDate = new Date(localDateTimeString)
+    
+    return localDate.toISOString()
+  } catch (e) {
+    console.error('Error converting local datetime to UTC:', e)
+    return new Date(localDateTimeString).toISOString()
+  }
+}
+
 const PostEditorPage: React.FC = () => {
   const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const { timezone } = useSiteConfig()
   
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -86,17 +126,8 @@ const PostEditorPage: React.FC = () => {
           const response = await postsAPI.getAdminPost(postId)
           const postData = response.data
           
-          // Convert created_at to datetime-local format (YYYY-MM-DDTHH:mm)
-          let createdAtLocal = ''
-          if (postData.created_at) {
-            const date = new Date(postData.created_at)
-            const year = date.getFullYear()
-            const month = String(date.getMonth() + 1).padStart(2, '0')
-            const day = String(date.getDate()).padStart(2, '0')
-            const hours = String(date.getHours()).padStart(2, '0')
-            const minutes = String(date.getMinutes()).padStart(2, '0')
-            createdAtLocal = `${year}-${month}-${day}T${hours}:${minutes}`
-          }
+          // Convert created_at from UTC to browser's local timezone for editing
+          const createdAtLocal = utcToLocalDatetime(postData.created_at)
           
           const loadedPost = {
             title: postData.title,
@@ -145,8 +176,8 @@ const PostEditorPage: React.FC = () => {
     try {
       setAutoSaving(true)
 
-      // Convert datetime-local format to ISO 8601 for backend
-      let createdAtForBackend = post.created_at ? new Date(post.created_at).toISOString() : undefined
+      // Convert datetime-local format (in browser's local timezone) to UTC ISO 8601 for backend
+      let createdAtForBackend = post.created_at ? localDatetimeToUTC(post.created_at) : undefined
 
       if (postId) {
         // Update existing post
@@ -213,8 +244,8 @@ const PostEditorPage: React.FC = () => {
       setError('')
       setSuccess('')
 
-      // Convert datetime-local format to ISO 8601 for backend
-      let createdAtForBackend = post.created_at ? new Date(post.created_at).toISOString() : undefined
+      // Convert datetime-local format (in browser's local timezone) to UTC ISO 8601 for backend
+      let createdAtForBackend = post.created_at ? localDatetimeToUTC(post.created_at) : undefined
 
       if (postId) {
         // Update existing post
@@ -503,7 +534,7 @@ const PostEditorPage: React.FC = () => {
                       value={post.created_at}
                       onChange={(e) => handleFieldChange('created_at', e.target.value)}
                       variant="outlined"
-                      helperText="Set a custom publish date and time (leave empty for automatic)"
+                      helperText={`Set publish date/time in your local time. Visitors will see it in ${timezone} timezone.`}
                       InputLabelProps={{
                         shrink: true,
                       }}

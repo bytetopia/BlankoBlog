@@ -198,13 +198,27 @@ func (h *TemplateHandler) getCustomCSS() template.CSS {
 	return template.CSS(customCSS)
 }
 
-// formatDate formats a time to a readable string
-func formatDate(t time.Time) string {
-	return t.Format("2006-01-02")
+// formatDate formats a time to a readable string using the configured timezone
+func (h *TemplateHandler) formatDate(t time.Time) string {
+	// Get the configured timezone
+	tzString, err := h.configService.GetConfig("blog_timezone")
+	if err != nil || tzString == "" {
+		tzString = "UTC"
+	}
+	
+	// Load the timezone location
+	loc, err := time.LoadLocation(tzString)
+	if err != nil {
+		// Fallback to UTC if timezone is invalid
+		loc = time.UTC
+	}
+	
+	// Convert time to the configured timezone and format
+	return t.In(loc).Format("2006-01-02")
 }
 
 // convertPostToData converts a Post model to PostData
-func convertPostToData(post models.Post) PostData {
+func (h *TemplateHandler) convertPostToData(post models.Post) PostData {
 	tags := make([]TagData, len(post.Tags))
 	for i, tag := range post.Tags {
 		tags[i] = TagData{
@@ -227,7 +241,7 @@ func convertPostToData(post models.Post) PostData {
 		ViewCount:     post.ViewCount,
 		Tags:          tags,
 		CreatedAt:     post.CreatedAt,
-		FormattedDate: formatDate(post.CreatedAt),
+		FormattedDate: h.formatDate(post.CreatedAt),
 	}
 }
 
@@ -295,7 +309,7 @@ func (h *TemplateHandler) RenderPostList(c *gin.Context) {
 	// Convert posts to template data
 	postData := make([]PostData, len(posts))
 	for i, post := range posts {
-		postData[i] = convertPostToData(post)
+		postData[i] = h.convertPostToData(post)
 	}
 
 	// Calculate pagination
@@ -359,7 +373,7 @@ func (h *TemplateHandler) RenderPostDetail(c *gin.Context) {
 			EmailHash:     emailHash,
 			Content:       comment.Content,
 			CreatedAt:     comment.CreatedAt,
-			FormattedDate: formatDate(comment.CreatedAt),
+			FormattedDate: h.formatDate(comment.CreatedAt),
 		}
 	}
 
@@ -374,7 +388,7 @@ func (h *TemplateHandler) RenderPostDetail(c *gin.Context) {
 		BlogDescription: blogDescription,
 		BaseURL:         baseURL,
 		Year:            time.Now().Year(),
-		Post:            convertPostToData(post),
+		Post:            h.convertPostToData(post),
 		Comments:        commentData,
 		FooterLinks:     footerLinks,
 		T:               h.getTranslations(),
@@ -476,7 +490,7 @@ func (h *TemplateHandler) RenderTagPosts(c *gin.Context) {
 	// Convert posts to template data
 	postData := make([]PostData, len(posts))
 	for i, post := range posts {
-		postData[i] = convertPostToData(post)
+		postData[i] = h.convertPostToData(post)
 	}
 
 	// Calculate pagination

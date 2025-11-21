@@ -58,6 +58,7 @@ func (h *SettingsHandler) UpdateConfigs(c *gin.Context) {
 		"blog_description": true,
 		"custom_css":       true,
 		"language":         true,
+		"blog_timezone":    true,
 		"footer_links":     true,
 	}
 

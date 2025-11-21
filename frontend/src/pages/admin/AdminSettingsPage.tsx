@@ -161,6 +161,7 @@ const AdminSettingsPage: React.FC = () => {
           blog_description: config.blog_description || '',
           custom_css: config.custom_css || '',
           language: config.language || 'en',
+          blog_timezone: config.blog_timezone || 'UTC',
         }
       }
       
@@ -342,6 +343,43 @@ const AdminSettingsPage: React.FC = () => {
                     <MenuItem value="zh-CN">简体中文 (Simplified Chinese)</MenuItem>
                   </Select>
                   <FormHelperText>Language for visitor-facing pages (posts, tags, comments)</FormHelperText>
+                </FormControl>
+                <FormControl fullWidth>
+                  <InputLabel id="timezone-label">Blog Timezone</InputLabel>
+                  <Select
+                    labelId="timezone-label"
+                    id="timezone-select"
+                    value={config.blog_timezone || 'UTC'}
+                    label="Blog Timezone"
+                    onChange={(e) => handleConfigChange('blog_timezone', e.target.value)}
+                  >
+                    <MenuItem value="UTC">UTC (Coordinated Universal Time) - UTC+0</MenuItem>
+                    <MenuItem value="America/New_York">America/New York (EST/EDT) - UTC-5/-4</MenuItem>
+                    <MenuItem value="America/Chicago">America/Chicago (CST/CDT) - UTC-6/-5</MenuItem>
+                    <MenuItem value="America/Denver">America/Denver (MST/MDT) - UTC-7/-6</MenuItem>
+                    <MenuItem value="America/Los_Angeles">America/Los Angeles (PST/PDT) - UTC-8/-7</MenuItem>
+                    <MenuItem value="America/Toronto">America/Toronto - UTC-5/-4</MenuItem>
+                    <MenuItem value="America/Vancouver">America/Vancouver - UTC-8/-7</MenuItem>
+                    <MenuItem value="America/Mexico_City">America/Mexico City - UTC-6/-5</MenuItem>
+                    <MenuItem value="America/Sao_Paulo">America/São Paulo - UTC-3</MenuItem>
+                    <MenuItem value="Europe/London">Europe/London (GMT/BST) - UTC+0/+1</MenuItem>
+                    <MenuItem value="Europe/Paris">Europe/Paris (CET/CEST) - UTC+1/+2</MenuItem>
+                    <MenuItem value="Europe/Berlin">Europe/Berlin (CET/CEST) - UTC+1/+2</MenuItem>
+                    <MenuItem value="Europe/Rome">Europe/Rome (CET/CEST) - UTC+1/+2</MenuItem>
+                    <MenuItem value="Europe/Madrid">Europe/Madrid (CET/CEST) - UTC+1/+2</MenuItem>
+                    <MenuItem value="Europe/Moscow">Europe/Moscow (MSK) - UTC+3</MenuItem>
+                    <MenuItem value="Asia/Dubai">Asia/Dubai (GST) - UTC+4</MenuItem>
+                    <MenuItem value="Asia/Shanghai">Asia/Shanghai (CST) - UTC+8</MenuItem>
+                    <MenuItem value="Asia/Hong_Kong">Asia/Hong Kong (HKT) - UTC+8</MenuItem>
+                    <MenuItem value="Asia/Tokyo">Asia/Tokyo (JST) - UTC+9</MenuItem>
+                    <MenuItem value="Asia/Seoul">Asia/Seoul (KST) - UTC+9</MenuItem>
+                    <MenuItem value="Asia/Singapore">Asia/Singapore (SGT) - UTC+8</MenuItem>
+                    <MenuItem value="Asia/Kolkata">Asia/Kolkata (IST) - UTC+5:30</MenuItem>
+                    <MenuItem value="Australia/Sydney">Australia/Sydney (AEDT/AEST) - UTC+11/+10</MenuItem>
+                    <MenuItem value="Australia/Melbourne">Australia/Melbourne (AEDT/AEST) - UTC+11/+10</MenuItem>
+                    <MenuItem value="Pacific/Auckland">Pacific/Auckland (NZDT/NZST) - UTC+13/+12</MenuItem>
+                  </Select>
+                  <FormHelperText>Timezone for displaying all dates and times across the blog</FormHelperText>
                 </FormControl>
                 <Button
                   variant="contained"

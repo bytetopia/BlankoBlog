@@ -6,6 +6,7 @@ interface SiteConfig {
   blogName: string
   fontFamily: string
   fontUrl: string
+  timezone: string
   isLoading: boolean
   error: string | null
 }
@@ -25,6 +26,7 @@ export const SiteConfigProvider: React.FC<SiteConfigProviderProps> = ({ children
     blogName: 'BlankoBlog', // Default fallback
     fontFamily: '',
     fontUrl: '',
+    timezone: 'UTC', // Default timezone
     isLoading: true,
     error: null,
   })
@@ -37,11 +39,13 @@ export const SiteConfigProvider: React.FC<SiteConfigProviderProps> = ({ children
       const blogName = configData.blog_name || 'Blanko Blog'
       const fontFamily = configData.font_family || ''
       const fontUrl = configData.font_url || ''
+      const timezone = configData.blog_timezone || 'UTC'
       
       setConfig({
         blogName,
         fontFamily,
         fontUrl,
+        timezone,
         isLoading: false,
         error: null,
       })
@@ -51,6 +55,7 @@ export const SiteConfigProvider: React.FC<SiteConfigProviderProps> = ({ children
         blogName: 'Blanko Blog',
         fontFamily: '',
         fontUrl: '',
+        timezone: 'UTC',
         isLoading: false,
         error: 'Failed to load site configuration',
       })

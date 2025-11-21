@@ -94,6 +94,7 @@ func (s *ConfigService) setDefaultConfigs(configMap map[string]string) {
 		"blog_name":        "Blanko Blog",
 		"blog_description": "A simple and elegant blog platform",
 		"jwt_secret":       "", // Will be generated if not present
+		"blog_timezone":    "UTC", // Default timezone
 	}
 
 	for key, defaultValue := range defaults {
@@ -109,6 +110,7 @@ func (s *ConfigService) getDefaultValue(key string) string {
 		"blog_name":        "Blanko Blog",
 		"blog_description": "A simple and elegant blog platform",
 		"jwt_secret":       "", // Will be generated if not present
+		"blog_timezone":    "UTC", // Default timezone
 	}
 
 	return defaults[key]
@@ -131,6 +133,11 @@ func (s *ConfigService) InitializeDefaultConfigs() error {
 			Key:         "jwt_secret",
 			Value:       "", // Will be generated in GetJWTSecret method
 			Description: "Secret key used for JWT token signing",
+		},
+		"blog_timezone": {
+			Key:         "blog_timezone",
+			Value:       "UTC",
+			Description: "Timezone for displaying dates and times throughout the blog",
 		},
 	}
 
