@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bytetopia/BlankoBlog/backend/internal/i18n"
@@ -229,7 +231,10 @@ func (h *TemplateHandler) convertPostToData(post models.Post) PostData {
 	}
 
 	// Convert markdown to HTML
-	contentHTML := template.HTML(blackfriday.Run([]byte(post.Content)))
+	htmlContent := string(blackfriday.Run([]byte(post.Content)))
+	// Add lazy loading to images
+	htmlContent = addLazyLoadingToImages(htmlContent)
+	contentHTML := template.HTML(htmlContent)
 
 	return PostData{
 		ID:            post.ID,
@@ -587,4 +592,19 @@ func (h *TemplateHandler) HandleCommentSubmit(c *gin.Context) {
 
 	// Redirect back to post
 	c.Redirect(http.StatusSeeOther, "/posts/"+slug)
+}
+
+// addLazyLoadingToImages adds loading="lazy" attribute to all img tags in HTML
+func addLazyLoadingToImages(html string) string {
+	// Regex to match img tags that don't already have a loading attribute
+	imgRegex := regexp.MustCompile(`<img([^>]*?)(?:loading=["'].*?["'])?([^>]*?)>`)
+	
+	return imgRegex.ReplaceAllStringFunc(html, func(match string) string {
+		// Check if loading attribute already exists
+		if strings.Contains(match, "loading=") {
+			return match
+		}
+		// Add loading="lazy" before the closing >
+		return strings.TrimSuffix(match, ">") + ` loading="lazy">`
+	})
 }
